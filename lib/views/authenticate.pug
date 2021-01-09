@@ -1,0 +1,29 @@
+extends layout    
+
+block content
+    div.jumbotron
+        div.container-fluid
+            h1.display-4 Authorization Server
+                ul.list-group.list-group-flush
+                    li.list-group-item
+                        h5 Allow Authentication Request From:
+                        if client.clientId
+                            h6 Client Id: #{client.clientId}
+                        if client.redirectUris    
+                            h6 Redirect URI: #{client.redirectUris}                     
+                        div    
+                    li.list-group-item     
+                        form(method="POST" action="allowRequest")    
+                            input(type="hidden" name="request_id" value=requestId)    
+    
+                            div
+                                label.username-label(for="username") Username
+                                input.form-control.username-text-box(type="text" id="username" placeholder="User name" name="username" value="")
+                                label.username-label.password-label(for="password") Password
+                                input.form-control.username-text-box(type="password" id="password" placeholder="Password" name="password" value="")
+                            if client.scopes     
+                                h5.scope-header  Allow access to the following scopes:    
+                            each scope, index in client.scopes                       
+                                label.scope-label #[input.checkbox.scope-checkbox(type="checkbox" id=index name="scopes" value=scope checked )] #{scope}    
+                            div    
+                            button.btn.btn-primary.col-sm-offset-2(type='submit' name="allow" value="allow") Allow

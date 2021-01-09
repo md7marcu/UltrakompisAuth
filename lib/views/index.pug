@@ -1,0 +1,18 @@
+extends layout    
+
+
+block content
+    div.jumbotron
+        div.container-fluid
+            h1.display-4 Authorization Server
+            p
+            ul.list-group.list-group-flush
+                li.list-group-item 
+                    h5 Authorization endpoint 
+                    small #{endpoints.authorizationEndpoint}
+                li.list-group-item 
+                    h5 Access Token endpoint 
+                    small #{endpoints.accessTokenEndpoint}
+                li.list-group-item 
+                    h5 Alive endpoint 
+                    small #{endpoints.aliveEndpoint}

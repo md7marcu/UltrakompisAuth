@@ -1,0 +1,30 @@
+extends layout
+
+block content
+    h1= title
+
+    h3 Settings
+    - console.log(settings)
+    .col-6
+        ul.list-group
+            form(method="POST" action="settings")
+                //- p
+                - console.log(settings)
+                each setting, index in settings
+                    -console.log(setting)
+                    if index === 'users' || index === 'clients'
+                        - console.log(setting)
+                        li
+                            if index === 'users'
+                               h4 Users
+                            else if index === 'clients'
+                               h4 Clients
+                            ul.list-group   
+                                li.list-group-item !{index}: 
+                                    input(type=text name=index value=`${JSON.stringify(setting)}`)
+                    else
+                        li.list-group-item !{index}: 
+                            input(type=text name=index value=`${setting}`)
+                button.btn.btn-primary.col-sm-offset-2(type='submit' name="submit") Submit
+                br
+            

@@ -1,0 +1,2 @@
+OpenSSL> req -newkey rsa:2048 -nodes -keyout keytemp.pem -x509 -days 365 -out cert.pem
+OpenSSL> rsa -in keytemp.pem -out key.pem

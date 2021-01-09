@@ -1,0 +1,57 @@
+body {
+    padding: 40px 10px;
+    background-color: #eee;
+  }
+  .listing-reg h1 {
+    text-align: center;
+    margin: 0 0 2rem;
+  }
+  .mytextarea {
+    width: 600px;
+    height: 300px;
+  }
+  /* allow request */
+  .sub-heading {
+    padding-top: 50px;
+    padding-bottom: 10px;
+  }
+
+  .username-label {
+    padding-left: 2px;  
+    font-size: 1rem; /* h6 */
+    margin-bottom: .5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #212529;
+    display: block;    
+  }
+
+  .password-label {
+    padding-top: 10px;  
+  }
+  
+  .scope-header {
+    padding-top: 15px;
+  }
+
+  .scope-label {
+    padding-left: 2px;  
+    font-size: 1rem; /* h6 */
+    margin-bottom: .5rem;
+    font-weight: 500;
+    line-height: 1.2;
+    color: #212529;
+    display: block;
+  }
+
+  /* css for errors*/
+
+  .my-errors {
+    content: "! Error : ";
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    color: #f00;
+    font-size: 1.2rem;
+    display: table;
+  }
