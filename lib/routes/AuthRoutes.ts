@@ -65,7 +65,7 @@ export class AuthRoutes {
 
             // 3. Verify Scope/s
             if (req?.query?.scopes) {
-                let tmpScopes = Array.isArray(req.query.scopes) ? req.query.scopes.toString() : ((req.query.scopes ?? "") as string);
+                let tmpScopes = Array.isArray(req.query.scopes) ? req.query.scopes?.toString() : ((req.query.scopes ?? "") as string);
                 queryScopes = tmpScopes.split(",");
             }
             let openIdFlow = this.openIdFlow(queryScopes);
@@ -239,7 +239,7 @@ export class AuthRoutes {
                         let openIdConnectFlow = this.isOpenIdConnectFlow(authorizationCode.request.scopes);
 
                         // Verify PCKE - Stored hash should match hash of given code challenge
-                        if (client.public && openIdConnectFlow && config.usePkce) {
+                        if (client.public && openIdConnectFlow && config.settings.usePkce) {
                             const codeChallenge = authorizationCode.request.code_challenge;
                             const reqCodeChallenge = req.body.code_challenge;
 
@@ -250,7 +250,7 @@ export class AuthRoutes {
                             }
                         }
 
-                        if (config.saveAccessToken) {
+                        if (config.settings.saveAccessToken) {
                             this.db.saveAccessToken({accessToken: accessToken, clientId: clientId});
                         }
                         let refreshToken = getRandomString(config.settings.refreshTokenLength);
@@ -341,7 +341,7 @@ export class AuthRoutes {
     }
 
     private isOpenIdConnectFlow = (scopes: any): boolean => {
-        let tmpScopes = Array.isArray(scopes) ? scopes.toString() : scopes;
+        let tmpScopes = Array.isArray(scopes) ? scopes?.toString() : scopes;
 
         return tmpScopes.split(",").findIndex((x) => x === "openid") > -1;
     }
@@ -362,7 +362,7 @@ export class AuthRoutes {
     }
 
     private openIdFlow = (queryScopes: string[]) => {
-        return queryScopes.includes("openid");
+        return queryScopes?.includes("openid");
     }
 
     // Verify that the client has all scopes that's asked for
