@@ -21,7 +21,8 @@ describe("User routes", () => {
     });
 
     afterEach(async () => {
-        await UserModel.collection.deleteMany({email: testEmail.toLowerCase()});
+        if (process.env.NODE_ENV !== "test")
+            await UserModel.collection.deleteMany({email: testEmail.toLowerCase()});
     });
 
     it("Should return 200 when adding a user", async () => {

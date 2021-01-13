@@ -112,9 +112,7 @@ export default class Db {
                 tokens: tokens,
                 enabled: true,
             };
-            console.log(`users: ${JSON.stringify(this.users)}`);
             this.users.push(user);
-            console.log(`users after push: ${JSON.stringify(this.users)}`);
         }
 
         return user;
