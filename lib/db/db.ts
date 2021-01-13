@@ -104,6 +104,7 @@ export default class Db {
         if (!this.isTest && this.useMongo) {
             user = await new MongoDb().addUser(name, email, hashedPassword, tokens);
         } else {
+            console.log("wtf");
             user = {
                 userId: getRandomString(8),
                 name: name,
@@ -121,7 +122,7 @@ export default class Db {
     public async getUser(email: string): Promise<IUser> {
         if (!this.isTest && this.useMongo) {
             return await new MongoDb().getUser(email);
-        } else {
+        } else {            
             return find(this.users, (u) => u.email === email);
         }
     }

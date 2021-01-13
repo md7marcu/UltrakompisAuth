@@ -25,7 +25,6 @@ describe("User routes", () => {
     });
 
     it("Should return 200 when adding a user", async () => {
-        console.log(` : ${process.env.NODE_ENV}`); 
         const response = await Supertest(app)
         .post("/users/create")
         .type("form")
