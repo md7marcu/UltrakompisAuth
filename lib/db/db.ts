@@ -16,6 +16,7 @@ export default class Db {
     private refreshTokens = [];
     private users: [IUser] = config.settings.users;
     private useMongo: boolean = config.settings.useMongo;
+    private isTest: boolean = process.env.NODE_ENV === "test";
 
     // Return client information for given ClientId if available, else undefined
     public getClient(clientId: string): IClient {
@@ -100,7 +101,7 @@ export default class Db {
         let hashedPassword = await hash(password, 8);
         let user: IUser;
 
-        if (this.useMongo) {
+        if (!this.isTest && this.useMongo) {
             user = await new MongoDb().addUser(name, email, hashedPassword, tokens);
         } else {
             user = {
@@ -118,7 +119,7 @@ export default class Db {
     }
 
     public async getUser(email: string): Promise<IUser> {
-        if (this.useMongo) {
+        if (!this.isTest && this.useMongo) {
             return await new MongoDb().getUser(email);
         } else {
             return find(this.users, (u) => u.email === email);
@@ -126,7 +127,7 @@ export default class Db {
     }
 
     public async getSettings(): Promise<ISettings> {
-        if (this.useMongo) {
+        if (!this.isTest && this.useMongo) {
             return await new MongoDb().getSettings();
         } else {
             return config.settings;
@@ -134,7 +135,7 @@ export default class Db {
     }
 
     public async upsertSettings(settings: ISettings): Promise<ISettings> {
-        if (this.useMongo) {
+        if (!this.isTest && this.useMongo) {
             return await new MongoDb().upsertSettings(settings);
         } else {
             return config.settings;

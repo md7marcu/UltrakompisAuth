@@ -10,7 +10,7 @@
     "clean": "rm -rf ./dist",
     "prod": "env-cmd -f ./config/.env npm run build && npm run start",
     "test": "cp -R lib/views dist && cp -R public dist/public && cp -R config dist && NODE_ENV=test mocha -r ts-node/register test/**/*.spec.ts",
-    "test-dev": "cp -R lib/views dist && cp -R public dist/public && DEBUG=bajs NODE_ENV=tst nodemon --watch . --ext ts --exec \"env-cmd -f ./config/.env  mocha -r ts-node/register test/**/*.spec.ts\"",
+    "test-dev": "cp -R lib/views dist && cp -R public dist/public && DEBUG=bajs NODE_ENV=test nodemon --watch . --ext ts --exec \"env-cmd -f ./config/.env  mocha -r ts-node/register test/**/*.spec.ts\"",
     "coverage": "nyc -r lcov -e .ts -x \"*.spec.ts\" mocha -r ts-node/register test/**/*.spec.ts",
     "postinstall": "node-config-ts",
     "watch": "tsc -w -p .",
