@@ -102,10 +102,8 @@ export default class Db {
         let user: IUser;
 
         if (!this.isTest && this.useMongo) {
-            console.log("more wtf");
             user = await new MongoDb().addUser(name, email, hashedPassword, tokens);
         } else {
-            console.log("wtf");
             user = {
                 userId: getRandomString(8),
                 name: name,
@@ -114,7 +112,9 @@ export default class Db {
                 tokens: tokens,
                 enabled: true,
             };
+            console.log(`users: ${JSON.stringify(this.users)}`);
             this.users.push(user);
+            console.log(`users after push: ${JSON.stringify(this.users)}`);
         }
 
         return user;
