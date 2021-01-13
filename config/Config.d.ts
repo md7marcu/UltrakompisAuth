@@ -23,9 +23,7 @@ declare module "node-config-ts" {
     authorizationCodeLength: number
     accessTokenLength: number
     refreshTokenLength: number
-    clients: Client[]
     corsWhitelist: string[]
-    users: User[]
     expiryTime: number
     createdTimeAgo: number
     addNonceToAccessToken: boolean
@@ -36,6 +34,8 @@ declare module "node-config-ts" {
     useMongo: boolean
     usePkce: boolean
     overrideId: string
+    clients: Client[]
+    users: User[]
   }
   interface User {
     userId: string
