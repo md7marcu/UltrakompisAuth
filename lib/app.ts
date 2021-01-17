@@ -43,6 +43,8 @@ export class App {
             this.app.Db.getSettings().then((settings) => {
                 config.settings = settings;
                 debug(`Override Settings: ${JSON.stringify(config.settings)}`);
+            }).catch((error) => {
+                debug(`Exception while getting settings: ${error}`);
             });
         }
 
@@ -86,6 +88,7 @@ export class App {
             const mockMongoose = new MockMongoose.MockMongoose(mongoose);
 
             mockMongoose.prepareStorage().then( () => {
+                mongoose.set("useFindAndModify", false);
                 mongoose.connect(connectionString, {
                     useNewUrlParser: true,
                     useCreateIndex: true,

@@ -6,6 +6,9 @@ import { expect } from "chai";
 import { Response } from "express";
 import UserModel from "../lib/db/UserModel";
 import * as Debug from "debug";
+import * as mongoose from "mongoose";
+import { MockMongoose } from "mock-mongoose";
+const mockMongoose = new MockMongoose(mongoose);
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -18,6 +21,17 @@ describe("User routes", () => {
 
     before( async() => {
         Debug.disable();
+        mockMongoose.prepareStorage().then(function() {
+            mongoose.set("useFindAndModify", false);
+            mongoose.connect(process.env.MONGODB_URL, {
+                useNewUrlParser: true,
+                useCreateIndex: true,
+                useUnifiedTopology: true,
+            }).
+            catch(error =>
+                Debug(`Unable to connect to mongodb @${process.env.MONGODB_URL}, error: ${error}`),
+            );
+        });
     });
 
     afterEach(async () => {

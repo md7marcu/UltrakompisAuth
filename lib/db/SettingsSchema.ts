@@ -19,6 +19,9 @@ export const SettingsSchema: Schema = new Schema({
     clearRequestId: Boolean,
     authorizationCodeLength: Number,
     accessTokenLength: Number,
+    removeExpiredAccessTokens: Boolean,
+    removeExpiredRefreshTokens: Boolean,
+    removeExpiredIdTokens: Boolean,
     refreshTokenLength: Number,
     clients: [
         {

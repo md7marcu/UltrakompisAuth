@@ -6,6 +6,9 @@ import * as Debug from "debug";
 import { expect } from "chai";
 import { config } from "node-config-ts";
 import * as path from "path";
+import * as mongoose from "mongoose";
+import { MockMongoose } from "mock-mongoose";
+const mockMongoose = new MockMongoose(mongoose);
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -16,6 +19,17 @@ describe("OIDC authorization code flow", () => {
 
     before( async() => {
         Debug.disable();
+        mockMongoose.prepareStorage().then(function() {
+            mongoose.set("useFindAndModify", false);
+            mongoose.connect(process.env.MONGODB_URL, {
+                useNewUrlParser: true,
+                useCreateIndex: true,
+                useUnifiedTopology: true,
+            }).
+            catch(error =>
+                Debug(`Unable to connect to mongodb @${process.env.MONGODB_URL}, error: ${error}`),
+            );
+        });
     });
 
     beforeEach(() => {

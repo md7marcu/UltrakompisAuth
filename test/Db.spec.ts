@@ -2,14 +2,13 @@ import { expect, assert } from "chai";
 import Db from "../lib/db/db";
 import { Guid } from "guid-typescript";
 import { config } from "node-config-ts";
-import { hash, compare} from "bcryptjs";
+import { compare} from "bcryptjs";
 import * as Debug from "debug";
 
 describe ("Static Db implementation", () => {
-
-    before(() => {
-        config.settings.useMongo = false;
+    before( async() => {
         Debug.disable();
+        config.settings.useMongo = false;
     });
 
     it ("Should return undefined if the client doesn't exist", () => {
@@ -73,37 +72,19 @@ describe ("Static Db implementation", () => {
         expect(request).to.be.empty.string;
     });
 
-    it ("Should save an access token", () => {
-        let accessToken = "token321";
-        let clientId = "Client23";
-        let db = new Db();
-        db.saveAccessToken(accessToken, clientId);
-
-        // tslint:disable-next-line:no-unused-expression
-        expect(db.validAccessToken(accessToken)).to.be.true;
-        assert.equal(db.getAccessToken(accessToken).clientId, clientId);
-    });
-
-    it ("Should save a refresh token", () => {
+    it ("Should save a refresh token", async () => {
         let refreshToken = "token321";
         let clientId = "Client23";
         let scopes = ["c", "b"];
         let db = new Db();
-        db.saveRefreshToken(refreshToken, clientId, scopes);
+        db.saveRefreshTokenToUser("user.name", refreshToken, clientId, scopes);
+
+        let validToken = await db.validRefreshToken(refreshToken);
+        let refreshTokenData = await db.getRefreshToken(refreshToken);
 
         // tslint:disable-next-line:no-unused-expression
-        expect(db.validRefreshToken(refreshToken)).to.be.true;
-        assert.equal(db.getRefreshToken(refreshToken).clientId, clientId);
-    });
-
-    it ("Should return a user given an authorization code", () => {
-        let db = new Db();
-        let code = "123";
-        db.updateUser(config.settings.users[0].name, 0, code);
-
-        let user = db.getUserFromCode(code);
-
-        expect(user.name).to.equal(config.settings.users[0].name);
+        expect(validToken).to.be.true;
+        assert.equal(refreshTokenData.clientId, clientId);
     });
 
     it ("Should add a user and return it", async () => {

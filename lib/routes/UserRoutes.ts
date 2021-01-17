@@ -12,7 +12,7 @@ export class UserRoutes {
 
         app.post("/users/create", async (req: Request, res: Response) => {
             debug(`Adding User: ${JSON.stringify(req.body)}`);
-            let user = await db.addUser(req?.body?.name, req?.body?.email, req?.body?.password, req?.body?.tokens);
+            let user = await db.addUser(req?.body?.name, req?.body?.email, req?.body?.password, req?.body?.claims);
             debug(`Sending user: ${JSON.stringify(user)}`);
             res.status(200).send(user);
         });

@@ -17,6 +17,9 @@
         "clearRequestId": true,
         "authorizationCodeLength": 16,
         "accessTokenLength": 16,
+        "removeExpiredAccessTokens": true,
+        "removeExpiredRefreshTokens": true,
+        "removeExpiredIdTokens": true,
         "refreshTokenLength": 64,
         "corsWhitelist": ["http://localhost:4200", "https://localhost:3000", "https://localhost:3002"],
         "expiryTime": 3600,
@@ -53,7 +56,7 @@
             {
                 "userId": "12345678",
                 "password": "verysecret#",
-                "email": "user@email.com",
+                "email": "user2@email.com",
                 "name": "Email Juarez"
             }
         ]

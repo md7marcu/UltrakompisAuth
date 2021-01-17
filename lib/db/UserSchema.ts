@@ -18,10 +18,50 @@ export const UserSchema: Schema = new Schema({
         type: String,
         required: true,
     },
-    tokens: [{
+    idTokens: [{
         token: {
             type: String,
         },
+        created: {
+            type: Number,
+        },
+        expires: {
+            type: Number,
+        },
+    }],
+    accessTokens: [{
+        token: {
+            type: String,
+        },
+        created: {
+            type: Number,
+        },
+        expires: {
+            type: Number,
+        },
+    }],
+    refreshTokens: [{
+        token: {
+            type: String,
+        },
+        created: {
+            type: Number,
+        },
+        expires: {
+            type: Number,
+        },
+        clientId: {
+            type: String,
+        },
+        scopes: {
+            type: [String],
+        },
+        userId: {
+            type: String,
+        },
+    }],
+    claims: [{
+        type: String,
     }],
     code: String,
     nonce: String,

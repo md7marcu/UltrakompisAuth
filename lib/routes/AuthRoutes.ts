@@ -147,10 +147,13 @@ export class AuthRoutes {
                     }
 
                     let codeId = getRandomString(config.settings.authorizationCodeLength);
-                    const request = { request: query, scopes: selectedScopes };
+                    const request = { request: query, scopes: selectedScopes, userid: req.body.username };
 
                     this.db.saveAuthorizationCode(codeId, request);
-                    this.db.updateUser(config.settings.users[0].name,  Math.round((new Date()).getTime() / 1000), codeId);
+
+                    if (this.isOpenIdConnectFlow && req.body?.username) {
+                        this.db.updateUser(req.body.username,  Math.round((new Date()).getTime() / 1000), codeId);
+                    }
 
                     let queryParams: any;
 
@@ -225,22 +228,22 @@ export class AuthRoutes {
                     return;
                 }
 
-                let authorizationCode = this.db.getAuthorizationCode(req.body.authorization_code);
+                let authorizationCodeRequest = this.db.getAuthorizationCode(req.body.authorization_code);
 
-                if (authorizationCode) {
+                if (authorizationCodeRequest) {
                     // remove code so it cannot be reused
                     if (config.settings.clearAuthorizationCode) {
                         this.db.deleteAuthorizationCode(req.body.authorization_code);
                     }
 
-                    if (config.settings.verifyClientId && authorizationCode.request.client_id === clientId) {
-                        let payload = this.buildAccessToken(authorizationCode.scopes);
+                    if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
+                        let payload = await this.buildAccessToken(authorizationCodeRequest.scopes, authorizationCodeRequest?.userid);
                         let accessToken = this.signToken(payload);
-                        let openIdConnectFlow = this.isOpenIdConnectFlow(authorizationCode.request.scopes);
+                        let openIdConnectFlow = this.isOpenIdConnectFlow(authorizationCodeRequest.request.scopes);
 
                         // Verify PCKE - Stored hash should match hash of given code challenge
                         if (client.public && openIdConnectFlow && config.settings.usePkce) {
-                            const codeChallenge = authorizationCode.request.code_challenge;
+                            const codeChallenge = authorizationCodeRequest.request.code_challenge;
                             const reqCodeChallenge = req.body.code_challenge;
 
                             if (!verifyCodeChallenge(codeChallenge, reqCodeChallenge)) {
@@ -251,54 +254,68 @@ export class AuthRoutes {
                         }
 
                         if (config.settings.saveAccessToken) {
-                            this.db.saveAccessToken({accessToken: accessToken, clientId: clientId});
+                            if (openIdConnectFlow) {
+                                this.db.saveAccessTokenToUser(authorizationCodeRequest?.userid, accessToken);
+                            } else {
+                                this.db.saveAccessToken(accessToken, clientId);
+                            }
                         }
                         let refreshToken = getRandomString(config.settings.refreshTokenLength);
-                        this.db.saveRefreshToken(refreshToken, clientId, authorizationCode.scopes);
-                        let resultPayload = {access_token: accessToken, refresh_token: refreshToken };
 
                         if (openIdConnectFlow) {
-                            (resultPayload as any).id_token = this.signToken(this.buildIdToken(req.body.authorization_code,  clientId, this.db));
+                            this.db.saveRefreshTokenToUser(authorizationCodeRequest.userid, refreshToken, clientId, authorizationCodeRequest.scopes);
+                        } else {
+                            this.db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scopes, authorizationCodeRequest.userid);
+                        }
+                        let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
+
+                        if (openIdConnectFlow) {
+                            let idToken = await this.buildIdToken(authorizationCodeRequest?.userid,  clientId, this.db);
+                            resultPayload.id_token = this.signToken(idToken);
+                            this.db.saveIdTokenToUser(authorizationCodeRequest?.userid, resultPayload.id_token);
                         }
                         res.status(200).send(resultPayload);
 
                         return;
                     } else {
-                        debug(`Client id does not match stored client id: ${authorizationCode.request.client_id}/${clientId}`);
+                        debug(`Client id does not match stored client id: ${authorizationCodeRequest.request.client_id}/${clientId}`);
                         res.status(400).send("Invalid grant.");
 
                         return;
                     }
                 } else {
-                    debug(`Could not find code in storage ${authorizationCode}`);
+                    debug(`Could not find code in storage ${authorizationCodeRequest}`);
                     res.status(400).send("Invalid grant.");
 
                 return;
             }
             } else if (req.body.grant_type === config.settings.refreshTokenGrant) {
+                // Check if we have the refresh token (with related data), i.e. valid refresh token
+                let refreshTokenData = await this.db.getRefreshToken(req?.body?.refresh_token ?? "");
 
-                // Check if we have the refresh token, i.e. valid refresh token
-                let refreshToken = this.db.getRefreshToken(req?.body?.refresh_token ?? "");
-
-                if (refreshToken) {
+                if (refreshTokenData) {
                     debug("Verified refresh token.");
 
-                    if (config.settings.verifyClientId && refreshToken.clientId !== clientId) {
+                    if (config.settings.verifyClientId && refreshTokenData.clientId !== clientId) {
                          debug("Client mismatch on refresh token.");
-                         res.status(400).send("Invalid refresh token.");
+                         res.status(400).send("Invalid client on refresh token.");
 
                         return;
                     }
-                    let payload = this.buildAccessToken(refreshToken.scopes);
+                    let payload = await this.buildAccessToken(refreshTokenData.scopes, refreshTokenData.userId);
                     let accessToken = this.signToken(payload);
 
                     if (config.settings.saveAccessToken) {
-                        this.db.saveAccessToken(accessToken, clientId);
+                        if (refreshTokenData.userId) {
+                            this.db.saveAccessTokenToUser(refreshTokenData.userId, accessToken);
+                        } else {
+                            this.db.saveAccessToken(accessToken, clientId);
+                        }
                     }
-                    res.status(200).send({access_token: accessToken, refresh_token: refreshToken.refreshToken });
+                    res.status(200).send({access_token: accessToken, refresh_token: refreshTokenData.refreshToken });
                 } else {
-                    debug("Called with invalid refresh token");
-                    res.status(400).send("Invalid Code.");
+                    debug("Called with invalid refresh token.");
+                    res.status(400).send("Called with invalid refresh token.");
 
                     return;
                 }
@@ -347,12 +364,12 @@ export class AuthRoutes {
     }
 
     // Create an id token for OpenId Connect flow
-    private buildIdToken = (authorizationCode: any, clientId: string, db: Db): IVerifyOptions => {
-        let user = db.getUserFromCode(authorizationCode);
+    private buildIdToken = async (email: string, clientId: string, db: Db): Promise<IVerifyOptions> => {
+        let user = await db.getUser(email);
 
         return {
             iss: config.settings.issuer,
-            sub: user.userId,
+            sub: user?.email,
             aud: clientId,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
@@ -370,14 +387,17 @@ export class AuthRoutes {
        return difference(askedScopes, clientScopes).length > 0;
     }
 
-    private buildAccessToken = (scopes): IVerifyOptions => {
+    private buildAccessToken = async (scopes: [String], userid: String): Promise<IVerifyOptions> => {
+        let user = await this.db.getUser(userid);
         let payload = {
             iss: config.settings.issuer,
             aud: config.settings.audience,
-            sub: config.settings.subject,
+            sub: user?.userId ?? config.settings.subject,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
             scope: scopes,
+            email: user?.email,
+            claims: user?.claims,
         };
 
         if (config.settings.addNonceToToken) {
