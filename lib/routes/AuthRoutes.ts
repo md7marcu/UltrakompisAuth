@@ -196,8 +196,8 @@ export class AuthRoutes {
                 // TODO: Check header for clientId and secret
                 // basic auth clientid:clientsecret	var headers = {
                 // header "Authorization": "Basic "  + client_id ":" client_secret
-                debug(`Client id or secret are invalid ${req.body.client_id}/${req.body.client_secret}`);
-                res.status(401).send("Client Id/Client Secret basic auth not supported.");
+                debug(`Client id or secret are invalid ${req.body.client_id}/`);
+                res.status(401).send(`Client id or secret are invalid ${req.body.client_id}`);
 
                 return;
             }
@@ -296,7 +296,7 @@ export class AuthRoutes {
                 if (refreshTokenData) {
                     debug("Verified refresh token.");
 
-                    if (config.settings.verifyClientId && refreshTokenData.clientId !== clientId) {
+                    if (config.settings.verifyClientIdOnRefreshToken && refreshTokenData.clientId !== clientId) {
                          debug("Client mismatch on refresh token.");
                          res.status(400).send("Invalid client on refresh token.");
 

@@ -261,6 +261,5 @@ describe("Express routes", () => {
         expect(token.email).to.be.equal(user.email);
         // tslint:disable-next-line:no-unused-expression
         expect((Date.now() / 1000 - token.exp) < 100).to.be.true;
-
     });
 });

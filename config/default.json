@@ -10,6 +10,7 @@
         "scopes": "ssn",
         "verifyRedirectUrl": true,
         "verifyClientId": true,
+        "verifyClientIdOnRefreshToken": true,
         "verifyScope": true,
         "verifyCode": true,
         "validateScope": true,

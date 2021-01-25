@@ -15,6 +15,7 @@ declare module "node-config-ts" {
     scopes: string
     verifyRedirectUrl: boolean
     verifyClientId: boolean
+    verifyClientIdOnRefreshToken: boolean
     verifyScope: boolean
     verifyCode: boolean
     validateScope: boolean
