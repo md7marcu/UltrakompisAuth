@@ -48,8 +48,7 @@ export default class MongoDb {
     }
 
     public async getUser(email: string): Promise<IUser> {
-        let user = await UserModel.findOne({email: email, enabled: true}).lean();
-        return user;
+        return await UserModel.findOne({email: email, enabled: true}).lean();
     }
 
     public async saveAccessTokenToUser(email: string, accessToken: string, decodedToken: any) {
@@ -148,7 +147,6 @@ export default class MongoDb {
             });
     }
     public async getClient(clientId: string): Promise<IClient> {
-        let client = await ClientModel.findOne({clientId: clientId, enabled: true}).lean();
-        return client;
+        return await ClientModel.findOne({clientId: clientId, enabled: true}).lean();
     }
 }

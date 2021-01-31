@@ -136,7 +136,8 @@ export class AuthRoutes {
                 if (query.response_type === "code") {
                     // Verify scopes - should be the same as the clients scope
                     let selectedScopes = req.body.scopes;
-                    let client: IClient = await this.db.getClient(query.client_id);
+                    let client = this.db.getClient(query.client_id);
+
                     let invalidScopes = this.verifyScope(selectedScopes, client.scopes);
 
                     if (config.settings.validateScope && invalidScopes) {
@@ -145,7 +146,6 @@ export class AuthRoutes {
 
                         return;
                     }
-
                     let codeId = getRandomString(config.settings.authorizationCodeLength);
                     const request = { request: query, scopes: selectedScopes, userid: req.body.username };
 

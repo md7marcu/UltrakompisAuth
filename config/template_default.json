@@ -1,0 +1,67 @@
+{    
+    "settings": {
+        "issuer": "",
+        "audience": "",
+        "subject": "",
+        "algorithm": "RS256",
+        "authorizationEndpoint": "https://localhost:3002/authorize",
+        "accessTokenEndpoint": "https://localhost:3002/token",
+        "aliveEndpoint": "https://localhost:3002/alive",
+        "scopes": "ssn",
+        "verifyRedirectUrl": true,
+        "verifyClientId": true,
+        "verifyClientIdOnRefreshToken": true,
+        "verifyScope": true,
+        "verifyCode": true,
+        "validateScope": true,
+        "clearAuthorizationCode": true,
+        "clearRequestId": true,
+        "authorizationCodeLength": 16,
+        "accessTokenLength": 16,
+        "removeExpiredAccessTokens": true,
+        "removeExpiredRefreshTokens": true,
+        "removeExpiredIdTokens": true,
+        "refreshTokenLength": 64,
+        "corsWhitelist": ["http://localhost:4200", "https://localhost:3000", "https://localhost:3002", ],
+        "expiryTime": 3600,
+        "createdTimeAgo": 30,
+        "addNonceToAccessToken": true,
+        "saveAccessToken": true,
+        "authorizationCodeGrant": "authorization_code",
+        "refreshTokenGrant": "refresh_token",
+        "verifyState": true,
+        "useMongo": true,
+        "usePkce": true,
+        "overrideId": "31337",
+        "clients": [
+            {
+                "clientId": "ukauth-client",
+                "clientSecret": "secretsecretsecret",
+                "redirectUris": ["https://localhost:3000/authorizeCallback"],
+                "scopes": ["ssn", "something", "else"]
+            },
+            {
+                "clientId": "authenticate",
+                "clientSecret": "othersecret",
+                "redirectUris": ["https://localhost:3000/authorizeCallback"],
+                "scopes": ["weight", "openid"]
+            },
+            {
+                "clientId": "public-client",
+                "public": true,
+                "redirectUris": [
+                    "http://localhost:4200/callback", 
+                    "http://localhost:4200/authenticated"],
+                "scopes": ["openid"]
+            }
+        ],
+        "users": [
+            {
+                "userId": "12345678",
+                "password": "verysecret#",
+                "email": "user2@email.com",
+                "name": "Email Juarez"
+            }
+        ]
+    }
+}
