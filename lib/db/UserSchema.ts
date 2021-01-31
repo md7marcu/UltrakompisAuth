@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import isEmail  from "validator/lib/isEmail";
+import { hashSync, genSaltSync } from "bcryptjs";
 
 export const UserSchema: Schema = new Schema({
     name: {
@@ -67,4 +68,19 @@ export const UserSchema: Schema = new Schema({
     nonce: String,
     lastAuthenticated: String,
     enabled: { type: Boolean, default: false},
+});
+
+UserSchema.pre("save", function(next) {
+    let user: any = this;
+    // only hash the password if it has been modified (or is new)
+    if (!user.isModified("password")) {
+        return next();
+    }
+
+    // generate a salt
+    let salt = genSaltSync(10);
+    let hash = hashSync(user.password, salt);
+    // override the cleartext password with the hashed one
+    user.password = hash;
+    next();
 });

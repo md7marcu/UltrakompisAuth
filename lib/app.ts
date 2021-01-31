@@ -11,6 +11,7 @@ const debug = Debug("AuthServer:");
 import * as MockMongoose from "mock-mongoose";
 import * as cors from "cors";
 import { ViewRoutes } from "./routes/ViewRoutes";
+import { ClientRoutes } from "./routes/ClientRoutes";
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -22,6 +23,7 @@ export class App {
     private authRoutes: AuthRoutes = new AuthRoutes();
     private userRoutes: UserRoutes = new UserRoutes();
     private viewRoutes: ViewRoutes = new ViewRoutes();
+    private clientRoutes: ClientRoutes = new ClientRoutes();
     private mongoUrl: string = process.env.MONGODB_URL;
     private isDev: boolean = process.env.NODE_ENV === "test";
 
@@ -34,6 +36,7 @@ export class App {
         this.authRoutes.routes(this.app);
         this.userRoutes.routes(this.app);
         this.viewRoutes.routes(this.app);
+        this.clientRoutes.routes(this.app);
         debug.log = console.log.bind(console);
 
         if (config.settings.useMongo) {
@@ -107,14 +110,14 @@ export class App {
                 useUnifiedTopology: true,
             }).
             catch(error =>
-                debug(`Unable to connect to mongodb @${connectionString}, error: ${error}`),
+                debug(`Unable to connect to mongodb, error: ${error}`),
             );
         }
         mongoose.connection.once("open", () => {
-            debug(`Connected to MongoDB @${connectionString}`);
+            debug(`Connected to MongoDB`);
         });
         mongoose.connection.on("error", (error) => {
-            debug(`Unable to connect to mongodb @${connectionString}, error ${error}`);
+            debug(`Unable to connect to mongodb, error ${error}`);
         });
     }
 }

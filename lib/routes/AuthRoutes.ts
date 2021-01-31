@@ -38,7 +38,7 @@ export class AuthRoutes {
         });
         app.get("/authorize", async(req: Request, res: Response) => {
              // 1. Verify ClientId
-            let client: IClient = this.db.getClient(((req?.query?.client_id ?? "") as string));
+            let client: IClient = await this.db.getClient(((req?.query?.client_id ?? "") as string));
 
             if (config.settings.verifyClientId && !client) {
                 res.render("authError",
@@ -136,7 +136,7 @@ export class AuthRoutes {
                 if (query.response_type === "code") {
                     // Verify scopes - should be the same as the clients scope
                     let selectedScopes = req.body.scopes;
-                    let client: IClient = this.db.getClient(query.client_id);
+                    let client: IClient = await this.db.getClient(query.client_id);
                     let invalidScopes = this.verifyScope(selectedScopes, client.scopes);
 
                     if (config.settings.validateScope && invalidScopes) {
@@ -202,7 +202,7 @@ export class AuthRoutes {
                 return;
             }
 
-            let client: IClient = this.db.getClient(clientId);
+            let client: IClient = await this.db.getClient(clientId);
 
             if (!client) {
                 debug(`Could not find client: ${clientId}`);

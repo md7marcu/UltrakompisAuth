@@ -6,9 +6,6 @@ import { expect } from "chai";
 import { Response } from "express";
 import UserModel from "../lib/db/UserModel";
 import * as Debug from "debug";
-import * as mongoose from "mongoose";
-import { MockMongoose } from "mock-mongoose";
-const mockMongoose = new MockMongoose(mongoose);
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -19,24 +16,26 @@ describe("User routes", () => {
     const testPassword: string = "TestPassword";
     const testEmail: string = "TestEmail@test.nu";
 
+    let user = {
+        password: "verysecret#",
+        email: "user@email.com",
+        name: "Email Juarez",
+        claims: ["duh", "lol"],
+        enabled: true,
+    };
     before( async() => {
         Debug.disable();
-        mockMongoose.prepareStorage().then(function() {
-            mongoose.set("useFindAndModify", false);
-            mongoose.connect(process.env.MONGODB_URL, {
-                useNewUrlParser: true,
-                useCreateIndex: true,
-                useUnifiedTopology: true,
-            }).
-            catch(error =>
-                Debug(`Unable to connect to mongodb @${process.env.MONGODB_URL}, error: ${error}`),
-            );
-        });
+
+        if (process.env.NODE_ENV === "test") {
+            await UserModel.collection.deleteMany({email: user.email.toLowerCase()});
+        }
+        await new UserModel(user).save();
     });
 
     afterEach(async () => {
-        if (process.env.NODE_ENV !== "test")
+        if (process.env.NODE_ENV === "test") {
             await UserModel.collection.deleteMany({email: testEmail.toLowerCase()});
+        }
     });
 
     it("Should return 200 when adding a user", async () => {
@@ -53,17 +52,13 @@ describe("User routes", () => {
     });
 
     it("Should return 200 when login in a user", async () => {
-        await addAUser();
-
-        const response = await authenticateUser(testEmail, testPassword);
+        const response = await authenticateUser(user.email, user.password);
 
         expect(response.status).to.be.equal(200);
     });
 
     it("Should return 401 when trying to authenticate with wrong credentials", async () => {
-        await addAUser();
-
-        let response: Response = await authenticateUser(testEmail, "WrongPassword");
+        let response: Response = await authenticateUser(user.email, "WrongPassword");
 
         expect(response.status).to.be.equal(401);
     });
@@ -73,16 +68,5 @@ describe("User routes", () => {
         .post("/users/authenticate")
         .type("form")
         .send({email: email, password: password});
-    };
-
-    const addAUser = async () => {
-        await Supertest(app)
-        .post("/users/create")
-        .type("form")
-        .send({
-            name: testName,
-            email: testEmail,
-            password: testPassword,
-        });
     };
 });

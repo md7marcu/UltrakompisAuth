@@ -22,7 +22,7 @@
         "removeExpiredRefreshTokens": true,
         "removeExpiredIdTokens": true,
         "refreshTokenLength": 64,
-        "corsWhitelist": ["http://localhost:4200", "https://localhost:3000", "https://localhost:3002"],
+        "corsWhitelist": ["http://localhost:4200", "http://192.168.86.127:4200", "https://localhost:3000", "https://localhost:3002"],
         "expiryTime": 3600,
         "createdTimeAgo": 30,
         "addNonceToAccessToken": true,
@@ -49,8 +49,12 @@
             {
                 "clientId": "public-client",
                 "public": true,
-                "redirectUris": ["http://localhost:4200/callback", "http://localhost:4200/authenticated"],
-                "scopes": ["openid", "ssn"]
+                "redirectUris": [
+                    "http://localhost:4200/callback", 
+                    "http://localhost:4200/authenticated",
+                    "http://192.168.86.127:4200/callback", 
+                    "http://192.168.86.127:4200/authenticated"],
+                "scopes": ["openid"]
             }
         ],
         "users": [

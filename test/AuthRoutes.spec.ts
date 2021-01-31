@@ -7,9 +7,8 @@ import { expect } from "chai";
 import { config } from "node-config-ts";
 import * as path from "path";
 import { Guid } from "guid-typescript";
-import * as mongoose from "mongoose";
-import { MockMongoose } from "mock-mongoose";
-const mockMongoose = new MockMongoose(mongoose);
+import ClientModel from "../lib/db/ClientModel";
+import UserModel from "../lib/db/UserModel";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -24,21 +23,30 @@ describe("Express routes", () => {
         email: "user@email.com",
         name: "Email Juarez",
         claims: ["duh", "lol"],
+        enabled: true,
+    };
+
+    let ukAuthClient = {
+        clientId: "ukauth-client",
+        clientSecret: "secretsecretsecret",
+        redirectUris: ["https://localhost:3000/authorizeCallback"],
+        scopes: ["ssn", "something", "else"],
+        enabled: true,
+    };
+
+    let authClient = {
+        clientId: "authenticate",
+        clientSecret: "othersecret",
+        redirectUris: ["https://localhost:3000/authorizeCallback"],
+        scopes: ["weight", "openid"],
+        enabled: true,
     };
 
     before( async() => {
-        Debug.disable();
-        mockMongoose.prepareStorage().then(function() {
-            mongoose.set("useFindAndModify", false);
-            mongoose.connect(process.env.MONGODB_URL, {
-                useNewUrlParser: true,
-                useCreateIndex: true,
-                useUnifiedTopology: true,
-            }).
-            catch(error =>
-                Debug(`Unable to connect to mongodb @${process.env.MONGODB_URL}, error: ${error}`),
-            );
-        });
+        await new ClientModel(ukAuthClient).save();
+        await new ClientModel(authClient).save();
+        await UserModel.findOneAndUpdate({email: user.email}, user, {new: true, upsert: true});
+        //  Debug.disable();
     });
 
     beforeEach(() => {
@@ -171,7 +179,6 @@ describe("Express routes", () => {
     it("Should return 200 and token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.addUserObject(user);
         db.saveAuthorizationCode(code,  {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
 
         const response = await Supertest(app)
@@ -192,7 +199,6 @@ describe("Express routes", () => {
     it("Should return 200 and token with claims", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.addUserObject(user);
         db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
 
         const response = await Supertest(app)
@@ -216,7 +222,6 @@ describe("Express routes", () => {
     it("Should return 400 when called with invalid refresh_token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        await db.addUserObject(user);
         await db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
         await db.saveRefreshToken("cba321", "3232", ["ssn"], user.email);
 
@@ -239,7 +244,6 @@ describe("Express routes", () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
         let refreshToken = "cba321-2";
-        await db.addUserObject(user);
         await db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
         await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
 

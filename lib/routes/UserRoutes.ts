@@ -3,7 +3,7 @@ import * as Debug from "debug";
 import { IApplication } from "../app";
 const debug = Debug("AuthServer:UserRoutes:");
 import Db from "../db/db";
-import { compare } from "bcryptjs";
+import { compareSync } from "bcryptjs";
 
 export class UserRoutes {
 
@@ -20,10 +20,11 @@ export class UserRoutes {
         app.post("/users/authenticate", async (req: Request, res: Response) => {
             debug (`Login User: ${JSON.stringify(req.body)}`);
             let user = await db.getUser(req?.body?.email);
+
             let validPassword = undefined;
 
             if (req?.body?.password && user?.password)
-                validPassword = await compare(req?.body?.password, user?.password);
+                validPassword = compareSync(req?.body?.password, user?.password);
 
             if (!validPassword) {
                 res.status(401).send("Wrong credentials supplied.");

@@ -7,11 +7,14 @@ import { config } from "node-config-ts";
 import IAccessToken from "interfaces/IAccessToken";
 import IIdToken from "interfaces/IIdToken";
 import IRefreshToken from "interfaces/IRefreshToken";
+import ClientModel from "./ClientModel";
+import IClient from "interfaces/IClient";
 
 const debug = Debug("AuthServer:MongoDB");
 debug.log = console.log.bind(console);
 
 export default class MongoDb {
+    // --------------------------------------------- USER ---------------------------------------------
     public async removeAuthorizationCodeFromUser(email: string) {
         return await UserModel.findOneAndUpdate({email: email}, { code: ""})
         .catch((error) => {
@@ -45,7 +48,8 @@ export default class MongoDb {
     }
 
     public async getUser(email: string): Promise<IUser> {
-        return await UserModel.findOne({email: email}).lean();
+        let user = await UserModel.findOne({email: email, enabled: true}).lean();
+        return user;
     }
 
     public async saveAccessTokenToUser(email: string, accessToken: string, decodedToken: any) {
@@ -97,6 +101,7 @@ export default class MongoDb {
         return user?.refreshTokens?.find(element => element.token === refreshToken);
     }
 
+    // --------------------------------------------- SETTINGS ---------------------------------------------
     public async getSettings(): Promise<ISettings> {
         let localSettings = await SettingsModel.findOne({overrideId: config.settings.overrideId});
 
@@ -113,6 +118,7 @@ export default class MongoDb {
 
         let localSettings = settings === undefined ? config.settings : settings;
         console.log(`insert: ${JSON.stringify(settings)}`);
+
         return await SettingsModel.findOneAndUpdate({overrideId: config.settings.overrideId}, localSettings, {
             new: true,
             upsert: true,
@@ -121,5 +127,28 @@ export default class MongoDb {
                 debug(`Failed to upsert the settings ${JSON.stringify(localSettings)}. err ${JSON.stringify(error)}`);
                 return undefined;
             });
+    }
+
+    // --------------------------------------------- CLIENT ---------------------------------------------
+    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scopes: string[],
+              publicClient: boolean): Promise<IClient> {
+
+        return await new ClientModel(
+            {
+                clientId: clientId,
+                clientSecret: clientSecret,
+                redirectUris: redirectUris,
+                scopes: scopes,
+                public: publicClient,
+                enabled: false,
+            }).save()
+            .catch((error) => {
+            debug(`Failed to add client with id ${clientId}. err: ${JSON.stringify(error)}`);
+            return undefined;
+            });
+    }
+    public async getClient(clientId: string): Promise<IClient> {
+        let client = await ClientModel.findOne({clientId: clientId, enabled: true}).lean();
+        return client;
     }
 }

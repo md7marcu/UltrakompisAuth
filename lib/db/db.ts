@@ -22,6 +22,8 @@ export default class Db {
     private isTest: boolean = process.env.NODE_ENV === "test";
     private maxDate = new Date(8640000000000000);
 
+    /* --------------------------------------------- AUTHORIZATION CODE --------------------------------------------- */
+
     // In memory only - Authorization code is valid for one try - no need to save it on a user
     public getAuthorizationCode(codeId: string) {
         return find(this.authorizationCodes, (c) => c.codeId === codeId)?.object ?? {};
@@ -47,10 +49,7 @@ export default class Db {
         });
     }
 
-    // Return client information for given ClientId if available, else undefined
-    public getClient(clientId: string): IClient {
-        return find(this.clients, (c) => { return c.clientId === clientId; });
-    }
+    /* --------------------------------------------- REQUEST --------------------------------------------- */
 
     public saveRequest(requestId: Guid, query: any) {
         this.requests.push({ "requestId": requestId.toString(), "query": query});
@@ -71,6 +70,38 @@ export default class Db {
         });
     }
 
+    /* --------------------------------------------- CLIENT --------------------------------------------- */
+
+    // Return client information for given ClientId if available, else undefined
+    public async getClient(clientId: string): Promise<IClient> {
+        if (this.useMongo) {
+            return await new MongoDb().getClient(clientId);
+        } else {
+            return find(this.clients, (c) => { return c.clientId === clientId; });
+        }
+    }
+
+    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scopes: string[],
+              publicClient: boolean): Promise<IClient> {
+        let client: IClient;
+
+        if (this.useMongo) {
+            client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scopes, publicClient);
+        } else {
+            client = {
+                clientId: clientId,
+                clientSecret: clientSecret,
+                redirectUris: redirectUris,
+                scopes: scopes,
+                public: publicClient,
+                enabled: true,
+            };
+            this.clients.push(client);
+        }
+
+        return client;
+    }
+    /* --------------------------------------------- USER --------------------------------------------- */
     public async saveAccessTokenToUser(email: string, accessToken: string) {
         if (this.useMongo) {
             let decodedToken = (decode(accessToken) as any);
@@ -163,6 +194,7 @@ export default class Db {
         }
     }
 
+    /* --------------------------------------------- SETTINGS --------------------------------------------- */
     public async getSettings(): Promise<ISettings> {
         if (this.useMongo) {
             return await new MongoDb().getSettings();
