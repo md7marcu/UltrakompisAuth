@@ -63,9 +63,10 @@ export class AuthRoutes {
             }
             let queryScopes: string[];
 
+            let scopes = this.getScopesFromRequest(req?.query);
             // 3. Verify Scope/s
-            if (req?.query?.scopes) {
-                let tmpScopes = Array.isArray(req.query.scopes) ? req.query.scopes?.toString() : ((req.query.scopes ?? "") as string);
+            if (scopes) {
+                let tmpScopes = Array.isArray(scopes) ? scopes?.toString() : ((scopes ?? "") as string);
                 queryScopes = tmpScopes.split(",");
             }
             let openIdFlow = this.openIdFlow(queryScopes);
@@ -95,7 +96,7 @@ export class AuthRoutes {
             }
         });
 
-        app.post("/allowRequest", this.openIdRequest, this.authenticateUser, async(req: Request, res: Response) => {
+        app.post("/allowRequest", this.authenticateUser, async(req: Request, res: Response) => {
             let query;
             let requestId;
 
@@ -120,10 +121,10 @@ export class AuthRoutes {
             }
 
             // If the user allowed the request
-            if (req.body.allow) {
-                const openIdRequest = req.body.openIdRequest;
+            if (req?.body?.allow) {
+                let selectedScopes =  this.getScopesFromRequest(req?.body);
 
-                if (openIdRequest && !req.body.authenticated) {
+                if (selectedScopes && this.isOpenIdConnectFlow(selectedScopes) && !req.body.authenticated) {
                     res.render("authError",
                     {
                         title: "Authentication Error",
@@ -135,8 +136,7 @@ export class AuthRoutes {
                 // Authorization code request
                 if (query.response_type === "code") {
                     // Verify scopes - should be the same as the clients scope
-                    let selectedScopes = req.body.scopes;
-                    let client = this.db.getClient(query.client_id);
+                    let client = await this.db.getClient(query.client_id);
 
                     let invalidScopes = this.verifyScope(selectedScopes, client.scopes);
 
@@ -245,7 +245,9 @@ export class AuthRoutes {
                         let openIdConnectFlow = this.isOpenIdConnectFlow(scopes);
 
                         // Verify PCKE - Stored hash should match hash of given code challenge
-                        if (client.public && openIdConnectFlow && config.settings.usePkce) {
+                        if (config.settings.usePkce &&
+                            (authorizationCodeRequest.request.code_challenge || authorizationCodeRequest.request.code_verifier)) {
+
                             const codeChallenge = authorizationCodeRequest.request.code_challenge;
                             const reqCodeChallenge = req.body.code_challenge ?? req.body.code_verifier;
 
@@ -338,28 +340,14 @@ export class AuthRoutes {
     }
 
     private authenticateUser = async(req: IRequest, res: Response, next: NextFunction): Promise<any> => {
+        let username = req?.body?.username;
+        let user = await this.db.getUser(username);
+        let password = req?.body?.password ? req?.body?.password : "";
 
-        if (req?.body?.openIdRequest) {
-            let username = req?.body?.username;
-            let user = await this.db.getUser(username);
-            let password = req?.body?.password ? req?.body?.password : "";
-
-            if (!user || password === "" || !user.enabled) {
-                req.body.authenticated = false;
-            } else {
-                req.body.authenticated = await compare(password, user?.password);
-            }
-            next();
-        }
-        next();
-    }
-
-    // Shortcut: We're just checking if there are any user/password fields available in order
-    // to decide if this is an openid request that needs authentication. In real life it would be
-    // obvious when it is an authentication request.
-    private openIdRequest = (req: IRequest, res: Response, next: NextFunction): any => {
-        if (req?.body.username && req?.body.password) {
-            req.body.openIdRequest = true;
+        if (!user || password === "" || !user.enabled) {
+            req.body.authenticated = false;
+        } else {
+            req.body.authenticated = await compare(password, user?.password);
         }
         next();
     }
