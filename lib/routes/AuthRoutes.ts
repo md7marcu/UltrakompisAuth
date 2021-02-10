@@ -151,7 +151,7 @@ export class AuthRoutes {
 
                     this.db.saveAuthorizationCode(codeId, request);
 
-                    if (this.isOpenIdConnectFlow && req.body?.username) {
+                    if (this.isOpenIdConnectFlow(selectedScopes) && req.body?.username) {
                         this.db.updateUser(req.body.username,  Math.round((new Date()).getTime() / 1000), codeId);
                     }
 
@@ -220,31 +220,34 @@ export class AuthRoutes {
             // 2. authorizationCode request =>
             if (req.body?.grant_type === config.settings.authorizationCodeGrant) {
 
+                let code = this.getAuthorizationCode(req.body);
+
                 // fresh or replayed token
-                if (config.settings.verifyCode && !this.db.validAuthorizationCode(req.body.authorization_code)) {
-                    debug(`Authorization Code is invalid: ${req.body.authorization_code}`);
+                if (config.settings.verifyCode && !this.db.validAuthorizationCode(code)) {
+                    debug(`Authorization Code is invalid (authorization_code/code): ${req.body.authorization_code} / ${req.body.code}`);
                     res.status(401).send("Invalid code.");
 
                     return;
                 }
 
-                let authorizationCodeRequest = this.db.getAuthorizationCode(req.body.authorization_code);
+                let authorizationCodeRequest = this.db.getAuthorizationCode(code);
 
                 if (authorizationCodeRequest) {
                     // remove code so it cannot be reused
                     if (config.settings.clearAuthorizationCode) {
-                        this.db.deleteAuthorizationCode(req.body.authorization_code);
+                        this.db.deleteAuthorizationCode(code);
                     }
 
                     if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
                         let payload = await this.buildAccessToken(authorizationCodeRequest.scopes, authorizationCodeRequest?.userid);
                         let accessToken = this.signToken(payload);
-                        let openIdConnectFlow = this.isOpenIdConnectFlow(authorizationCodeRequest.request.scopes);
+                        let scopes = this.getScopesFromRequest(authorizationCodeRequest.request);
+                        let openIdConnectFlow = this.isOpenIdConnectFlow(scopes);
 
                         // Verify PCKE - Stored hash should match hash of given code challenge
                         if (client.public && openIdConnectFlow && config.settings.usePkce) {
                             const codeChallenge = authorizationCodeRequest.request.code_challenge;
-                            const reqCodeChallenge = req.body.code_challenge;
+                            const reqCodeChallenge = req.body.code_challenge ?? req.body.code_verifier;
 
                             if (!verifyCodeChallenge(codeChallenge, reqCodeChallenge)) {
                                 debug(`CodeChallenge does not matched stored CodeChallenge: ${reqCodeChallenge} / ${codeChallenge}`);
@@ -330,6 +333,10 @@ export class AuthRoutes {
         });
     }
 
+    private getAuthorizationCode = (body: any): string => {
+        return body.authorization_code ?? body.code;
+    }
+
     private authenticateUser = async(req: IRequest, res: Response, next: NextFunction): Promise<any> => {
 
         if (req?.body?.openIdRequest) {
@@ -373,13 +380,17 @@ export class AuthRoutes {
             aud: clientId,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
-            auth_time: user.lastAuthenticated,
-            nonce: user.nonce,
+            auth_time: user?.lastAuthenticated,
+            nonce: user?.nonce,
         };
     }
 
     private openIdFlow = (queryScopes: string[]) => {
         return queryScopes?.includes("openid");
+    }
+
+    private getScopesFromRequest = (request: any) => {
+        return request.scopes ?? request.scope;
     }
 
     // Verify that the client has all scopes that's asked for
