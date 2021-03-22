@@ -5,11 +5,12 @@ import { config } from "node-config-ts";
 import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import getRandomString from "../helpers/GetRandomString";
 import signToken from "../helpers/SignToken";
+import IClientCredentialToken from "../interfaces/IClientCredentialToken";
 const debug = Debug("AuthServer:clientAuthController:");
 
 export class ClientCredentialsController {
 
-    public getTokens = async(db: Db, authorizationHeader: string): Promise<any> => {                
+    public getTokens = async(db: Db, authorizationHeader: string): Promise<IClientCredentialToken> => {                
         let encodedData = authorizationHeader?.split(" ")[1];
         let decodedData = this.decodeBase64(encodedData);
         let splitHeader = decodedData.split(":");
@@ -34,7 +35,7 @@ export class ClientCredentialsController {
                     token_type: config.settings.clientCredentialsTokenType, 
                     expires_in: config.settings.expiryTime, 
                     refresh_token: refreshToken,
-                    scopes: client.scopes
+                    scope: client.scopes
             };
         }
         return undefined;
