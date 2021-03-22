@@ -28,7 +28,9 @@
         "addNonceToAccessToken": true,
         "saveAccessToken": true,
         "authorizationCodeGrant": "authorization_code",
+        "clientCredentialsGrant": "client_credentials",        
         "refreshTokenGrant": "refresh_token",
+        "clientCredentialsTokenType": "bearer",
         "verifyState": true,
         "useMongo": true,
         "usePkce": true,
@@ -55,6 +57,12 @@
                     "http://192.168.86.127:4200/callback", 
                     "http://192.168.86.127:4200/authenticated"],
                 "scopes": ["openid"]
+            },
+            {
+                "clientId": "bff-client",
+                "public": false,
+                "redirectUris": [],
+                "scopes": ["http://localhost:31337"]
             }
         ],
         "users": [

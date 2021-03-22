@@ -5,9 +5,6 @@ import { Guid } from "guid-typescript";
 import * as buildUrl from "build-url";
 import * as Debug from "debug";
 const debug = Debug("AuthServer:AuthRoutes:");
-import * as Fs from "fs";
-import { sign } from "jsonwebtoken";
-import * as path from "path";
 import IClient from "interfaces/IClient";
 import Db from "../db/db";
 import { IVerifyOptions } from "../interfaces/IVerifyOptions";
@@ -15,6 +12,8 @@ import { IRequest } from "../interfaces/IRequest";
 import getRandomString from "../helpers/GetRandomString";
 import { compare } from "bcryptjs";
 import verifyCodeChallenge from "../helpers/VerifyCodeChallenge";
+import { ClientCredentialsController } from "../controllers/ClientCredentialsController";
+import signToken from "../helpers/SignToken";
 
 export class AuthRoutes {
     private db;
@@ -188,6 +187,18 @@ export class AuthRoutes {
             let clientId: string;
             let clientSecret: string;
 
+            if (req.body?.grant_type === config.settings.clientCredentialsGrant) {
+                let clientCredentialsController = new ClientCredentialsController();
+                let token = await clientCredentialsController.getTokens(this.db, req.headers.authorization);
+
+                if (token === undefined){
+                    res.status(401).send("Unknown Client or invalid Secret");
+                } else {
+                    res.status(200).send(token);
+                }
+                return;
+            }
+
             if (req.body.client_id) {
                 clientId = req.body.client_id;
                 // if this is a public client client_secret will not be defined
@@ -240,7 +251,7 @@ export class AuthRoutes {
 
                     if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
                         let payload = await this.buildAccessToken(authorizationCodeRequest.scopes, authorizationCodeRequest?.userid);
-                        let accessToken = this.signToken(payload);
+                        let accessToken = signToken(payload);
                         let scopes = this.getScopesFromRequest(authorizationCodeRequest.request);
                         let openIdConnectFlow = this.isOpenIdConnectFlow(scopes);
 
@@ -276,7 +287,7 @@ export class AuthRoutes {
 
                         if (openIdConnectFlow) {
                             let idToken = await this.buildIdToken(authorizationCodeRequest?.userid,  clientId, this.db);
-                            resultPayload.id_token = this.signToken(idToken);
+                            resultPayload.id_token = signToken(idToken);
                             this.db.saveIdTokenToUser(authorizationCodeRequest?.userid, resultPayload.id_token);
                         }
                         res.status(200).send(resultPayload);
@@ -308,7 +319,7 @@ export class AuthRoutes {
                         return;
                     }
                     let payload = await this.buildAccessToken(refreshTokenData.scopes, refreshTokenData.userId);
-                    let accessToken = this.signToken(payload);
+                    let accessToken = signToken(payload);
 
                     if (config.settings.saveAccessToken) {
                         if (refreshTokenData.userId) {
@@ -403,9 +414,5 @@ export class AuthRoutes {
             (payload as any).jti = getRandomString(16);
         }
         return payload;
-    }
-
-    private signToken = (options: IVerifyOptions): string => {
-        return sign(options, Fs.readFileSync(path.join(__dirname, "../../config/key.pem")), { algorithm: config.settings.algorithm });
     }
 }

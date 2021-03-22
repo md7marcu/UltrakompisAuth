@@ -142,8 +142,8 @@ export default class MongoDb {
                 enabled: false,
             }).save()
             .catch((error) => {
-            debug(`Failed to add client with id ${clientId}. err: ${JSON.stringify(error)}`);
-            return undefined;
+                debug(`Failed to add client with id ${clientId}. err: ${JSON.stringify(error)}`);
+                return undefined;
             });
     }
     public async getClient(clientId: string): Promise<IClient> {

@@ -285,3 +285,4 @@ coverage/
 config/.env
 .vscode/launch.json
 default.json
+lib/controllers/example.ts

@@ -9,6 +9,9 @@ import { hash } from "bcryptjs";
 import MongoDb from "./MongoDb";
 import { decode } from "jsonwebtoken";
 import IRefreshToken from "interfaces/IRefreshToken";
+import * as Debug from "debug";
+const debug = Debug("AuthServer:db");
+debug.log = console.log.bind(console);
 
 export default class Db {
     private clients = config.settings.clients;
@@ -75,7 +78,12 @@ export default class Db {
     // Return client information for given ClientId if available, else undefined
     public async getClient(clientId: string): Promise<IClient> {
         if (this.useMongo) {
-            return await new MongoDb().getClient(clientId);
+            try {
+                return await new MongoDb().getClient(clientId);
+            } catch (error) {
+                debug(`Could not get client ${clientId}: ${error}`);
+                console.log(`Could not get client ${clientId}: ${error}`);
+            }
         } else {
             return find(this.clients, (c) => { return c.clientId === clientId; });
         }
@@ -101,6 +109,14 @@ export default class Db {
 
         return client;
     }
+
+    // TODO: Save to MongoDB - won't be able to refresh after a restart ..
+    public saveClientRefreshToken(refreshToken: string, clientId: string) {
+        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId});
+    }
+
+    // TODO: Save access token to the client in Mongo - see saveAccessTokenToUser and saveAccessToken below
+    
     /* --------------------------------------------- USER --------------------------------------------- */
     public async saveAccessTokenToUser(email: string, accessToken: string) {
         if (this.useMongo) {

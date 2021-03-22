@@ -13,6 +13,7 @@ export const ClientSchema: Schema = new Schema({
     },
     redirectUris: [{
         type: String,
+        required: false,
     }],
     scopes: [{
         type: String,
@@ -23,5 +24,6 @@ export const ClientSchema: Schema = new Schema({
     },
     public: {
         type: Boolean,
+        required: false,
     },
 });

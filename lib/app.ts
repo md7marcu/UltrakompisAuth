@@ -12,6 +12,7 @@ import * as MockMongoose from "mock-mongoose";
 import * as cors from "cors";
 import { ViewRoutes } from "./routes/ViewRoutes";
 import { ClientRoutes } from "./routes/ClientRoutes";
+import { logger } from "./middleware/middleware";
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -63,6 +64,8 @@ export class App {
         this.app.use(bodyParser.urlencoded({ extended: false }));
         // serve static content
         this.app.use(express.static("public"));
+        // logger request middle ware
+        this.app.use(logger);
         // views
         this.app.set("views", `${__dirname}/views`);
         // App engine - html
@@ -89,6 +92,7 @@ export class App {
 
         if (isDev) {
             const mockMongoose = new MockMongoose.MockMongoose(mongoose);
+            console.log("Using Mocked Mongoose.");
 
             mockMongoose.prepareStorage().then( () => {
                 mongoose.set("useFindAndModify", false);

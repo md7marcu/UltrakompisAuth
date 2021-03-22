@@ -39,7 +39,9 @@ export default interface ISettings {
     addNonceToAccessToken: Boolean;
     saveAccessToken: Boolean;
     authorizationCodeGrant: String;
+    clientCredentialsGrant: String;
     refreshTokenGrant: String;
+    clientCredentialsTokenType: String;
     verifyState: Boolean;
     useMongo: Boolean;
 }

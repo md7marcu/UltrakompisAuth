@@ -30,7 +30,9 @@ declare module "node-config-ts" {
     addNonceToAccessToken: boolean
     saveAccessToken: boolean
     authorizationCodeGrant: string
+    clientCredentialsGrant: string
     refreshTokenGrant: string
+    clientCredentialsTokenType: string
     verifyState: boolean
     useMongo: boolean
     usePkce: boolean

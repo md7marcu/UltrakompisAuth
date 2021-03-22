@@ -15,7 +15,7 @@ interface IVerifyOptions extends VerifyOptions {
     aud: string;
 }
 
-describe("Express routes", () => {
+describe("Auth routes", () => {
     let db = (app as any).Db;
     let user = {
         userId: "12345678",
