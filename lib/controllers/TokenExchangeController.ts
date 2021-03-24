@@ -63,7 +63,7 @@ export class TokenExchangeController {
         return sub === clientId;
     }
 
-    private buildTokenExchangeToken = (subject: string, clientId: string, scopes: string[]): IVerifyOptions => {
+    private buildTokenExchangeToken = (subject: string, clientId: string, scope: string[]): IVerifyOptions => {
         let payload = {
             iss: config.settings.issuer,
             aud: config.settings.audience, //config.settings.microserviceAudience
@@ -73,7 +73,7 @@ export class TokenExchangeController {
             act: { 
                 sub: clientId 
             },
-            scope: scopes,
+            scope: scope,
         };
         return payload;
     }

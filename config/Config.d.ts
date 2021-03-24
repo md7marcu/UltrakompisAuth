@@ -12,7 +12,7 @@ declare module "node-config-ts" {
     authorizationEndpoint: string
     accessTokenEndpoint: string
     aliveEndpoint: string
-    scopes: string
+    scope: string
     verifyRedirectUrl: boolean
     verifyClientId: boolean
     verifyClientIdOnRefreshToken: boolean
@@ -57,7 +57,7 @@ declare module "node-config-ts" {
     clientId: string
     clientSecret?: string
     redirectUris: string[]
-    scopes: string[]
+    scope: string[]
     public?: boolean
   }
   export const config: Config

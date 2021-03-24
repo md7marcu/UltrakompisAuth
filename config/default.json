@@ -7,7 +7,7 @@
         "authorizationEndpoint": "https://localhost:3002/authorize",
         "accessTokenEndpoint": "https://localhost:3002/token",
         "aliveEndpoint": "https://localhost:3002/alive",
-        "scopes": "ssn",
+        "scope": "ssn",
         "verifyRedirectUrl": true,
         "verifyClientId": true,
         "verifyClientIdOnRefreshToken": true,
@@ -43,13 +43,13 @@
                 "clientId": "ukauth-client",
                 "clientSecret": "secretsecretsecret",
                 "redirectUris": ["https://localhost:3000/authorizeCallback"],
-                "scopes": ["ssn", "something", "else"]
+                "scope": ["ssn", "something", "else"]
             },
             {
                 "clientId": "authenticate",
                 "clientSecret": "othersecret",
                 "redirectUris": ["https://localhost:3000/authorizeCallback"],
-                "scopes": ["weight", "openid"]
+                "scope": ["weight", "openid"]
             },
             {
                 "clientId": "public-client",
@@ -59,13 +59,13 @@
                     "http://localhost:4200/authenticated",
                     "http://192.168.86.127:4200/callback", 
                     "http://192.168.86.127:4200/authenticated"],
-                "scopes": ["openid"]
+                "scope": ["openid"]
             },
             {
                 "clientId": "bff-client",
                 "public": false,
                 "redirectUris": [],
-                "scopes": ["http://localhost:31337"]
+                "scope": ["http://localhost:31337"]
             }
         ],
         "users": [

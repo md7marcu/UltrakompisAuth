@@ -76,11 +76,11 @@ export default class MongoDb {
     }
 
     public async saveRefreshTokenToUser(email: string, refreshToken: string, iat: number, exp: number,
-        clientId: string, scopes: string[]) {
+        clientId: string, scope: string[]) {
 
         await UserModel.findOneAndUpdate({email: email},
                 {$push: { refreshTokens: { token: refreshToken, created: iat, expires: exp, clientId: clientId,
-                    scopes: scopes, userId: email}}});
+                    scope: scope, userId: email}}});
 
         if (config.settings.removeExpiredRefreshTokens) {
             await UserModel.findOneAndUpdate({email: email},
@@ -129,7 +129,7 @@ export default class MongoDb {
     }
 
     // --------------------------------------------- CLIENT ---------------------------------------------
-    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scopes: string[],
+    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scope: string[],
               publicClient: boolean): Promise<IClient> {
 
         return await new ClientModel(
@@ -137,7 +137,7 @@ export default class MongoDb {
                 clientId: clientId,
                 clientSecret: clientSecret,
                 redirectUris: redirectUris,
-                scopes: scopes,
+                scope: scope,
                 public: publicClient,
                 enabled: false,
             }).save()

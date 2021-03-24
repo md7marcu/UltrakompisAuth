@@ -54,7 +54,7 @@ export const UserSchema: Schema = new Schema({
         clientId: {
             type: String,
         },
-        scopes: {
+        scope: {
             type: [String],
         },
         userId: {

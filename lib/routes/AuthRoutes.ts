@@ -61,18 +61,18 @@ export class AuthRoutes {
                 });
                 return;
             }
-            let queryScopes: string[];
+            let queryScope: string[];
 
-            let scopes = this.getScopesFromRequest(req?.query);
+            let scope = this.getScopeFromRequest(req?.query);
             // 3. Verify Scope/s
-            if (scopes) {
-                let tmpScopes = Array.isArray(scopes) ? scopes?.toString() : ((scopes ?? "") as string);
-                queryScopes = tmpScopes.split(",");
+            if (scope) {
+                let tmpScope = Array.isArray(scope) ? scope?.toString() : ((scope ?? "") as string);
+                queryScope = tmpScope.split(",");
             }
-            let openIdFlow = this.openIdFlow(queryScopes);
-            let invalidScopes = this.verifyScope(queryScopes, client.scopes);
+            let openIdFlow = this.openIdFlow(queryScope);
+            let invalidScope = this.verifyScope(queryScope, client.scope);
 
-            if (config.settings.validateScope && invalidScopes) {
+            if (config.settings.validateScope && invalidScope) {
                 res.redirect(
                     buildUrl(redirectUrl,
                     {
@@ -87,7 +87,7 @@ export class AuthRoutes {
             this.db.saveRequest(requestId, req?.query);
 
             // 5. Serve page and let user approve authorization (and possibly authenticate)
-            let renderData = { client: client, requestId: requestId.toString(), scopes: queryScopes};
+            let renderData = { client: client, requestId: requestId.toString(), scope: queryScope};
 
             if (openIdFlow) {
                 res.render("authenticate", renderData);
@@ -122,9 +122,9 @@ export class AuthRoutes {
 
             // If the user allowed the request
             if (req?.body?.allow) {
-                let selectedScopes =  this.getScopesFromRequest(req?.body);
+                let selectedScope =  this.getScopeFromRequest(req?.body);
 
-                if (selectedScopes && this.isOpenIdConnectFlow(selectedScopes) && !req.body.authenticated) {
+                if (selectedScope && this.isOpenIdConnectFlow(selectedScope) && !req.body.authenticated) {
                     res.render("authError",
                     {
                         title: "Authentication Error",
@@ -135,23 +135,23 @@ export class AuthRoutes {
 
                 // Authorization code request
                 if (query.response_type === "code") {
-                    // Verify scopes - should be the same as the clients scope
+                    // Verify scope - should be the same as the clients scope
                     let client = await this.db.getClient(query.client_id);
 
-                    let invalidScopes = this.verifyScope(selectedScopes, client.scopes);
+                    let invalidScope = this.verifyScope(selectedScope, client.scope);
 
-                    if (config.settings.validateScope && invalidScopes) {
+                    if (config.settings.validateScope && invalidScope) {
                         let url = buildUrl(query.redirect_uri, { queryParams: { error: "Invalid Scope"}});
                         res.redirect(url);
 
                         return;
                     }
                     let codeId = getRandomString(config.settings.authorizationCodeLength);
-                    const request = { request: query, scopes: selectedScopes, userid: req.body.username };
+                    const request = { request: query, scope: selectedScope, userid: req.body.username };
 
                     this.db.saveAuthorizationCode(codeId, request);
 
-                    if (this.isOpenIdConnectFlow(selectedScopes) && req.body?.username) {
+                    if (this.isOpenIdConnectFlow(selectedScope) && req.body?.username) {
                         this.db.updateUser(req.body.username,  Math.round((new Date()).getTime() / 1000), codeId);
                     }
 
@@ -263,10 +263,10 @@ export class AuthRoutes {
                     }
 
                     if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
-                        let payload = await this.buildAccessToken(authorizationCodeRequest.scopes, authorizationCodeRequest?.userid);
+                        let payload = await this.buildAccessToken(authorizationCodeRequest.scope, authorizationCodeRequest?.userid);
                         let accessToken = signToken(payload, app.httpsOptions.key);
-                        let scopes = this.getScopesFromRequest(authorizationCodeRequest.request);
-                        let openIdConnectFlow = this.isOpenIdConnectFlow(scopes);
+                        let scope = this.getScopeFromRequest(authorizationCodeRequest.request);
+                        let openIdConnectFlow = this.isOpenIdConnectFlow(scope);
 
                         // Verify PCKE - Stored hash should match hash of given code challenge
                         if (config.settings.usePkce &&
@@ -292,9 +292,9 @@ export class AuthRoutes {
                         let refreshToken = getRandomString(config.settings.refreshTokenLength);
 
                         if (openIdConnectFlow) {
-                            this.db.saveRefreshTokenToUser(authorizationCodeRequest.userid, refreshToken, clientId, authorizationCodeRequest.scopes);
+                            this.db.saveRefreshTokenToUser(authorizationCodeRequest.userid, refreshToken, clientId, authorizationCodeRequest.scope);
                         } else {
-                            this.db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scopes, authorizationCodeRequest.userid);
+                            this.db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scope, authorizationCodeRequest.userid);
                         }
                         let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
 
@@ -331,7 +331,7 @@ export class AuthRoutes {
 
                         return;
                     }
-                    let payload = await this.buildAccessToken(refreshTokenData.scopes, refreshTokenData.userId);
+                    let payload = await this.buildAccessToken(refreshTokenData.scope, refreshTokenData.userId);
                     let accessToken = signToken(payload, app.httpsOptions.key);
 
                     if (config.settings.saveAccessToken) {
@@ -376,10 +376,10 @@ export class AuthRoutes {
         next();
     }
 
-    private isOpenIdConnectFlow = (scopes: any): boolean => {
-        let tmpScopes = Array.isArray(scopes) ? scopes?.toString() : scopes;
+    private isOpenIdConnectFlow = (scope: any): boolean => {
+        let tmpScope = Array.isArray(scope) ? scope?.toString() : scope;
 
-        return tmpScopes.split(",").findIndex((x) => x === "openid") > -1;
+        return tmpScope.split(",").findIndex((x) => x === "openid") > -1;
     }
 
     // Create an id token for OpenId Connect flow
@@ -397,20 +397,20 @@ export class AuthRoutes {
         };
     }
 
-    private openIdFlow = (queryScopes: string[]) => {
-        return queryScopes?.includes("openid");
+    private openIdFlow = (queryScope: string[]) => {
+        return queryScope?.includes("openid");
     }
 
-    private getScopesFromRequest = (request: any) => {
-        return request.scopes ?? request.scope;
+    private getScopeFromRequest = (request: any) => {
+        return request.scope ?? request.scope;
     }
 
-    // Verify that the client has all scopes that's asked for
-    private verifyScope(askedScopes: string[], clientScopes: string[]): boolean {
-       return difference(askedScopes, clientScopes).length > 0;
+    // Verify that the client has all scope that's asked for
+    private verifyScope(askedScope: string[], clientScope: string[]): boolean {
+       return difference(askedScope, clientScope).length > 0;
     }
 
-    private buildAccessToken = async (scopes: [String], userid: String): Promise<IVerifyOptions> => {
+    private buildAccessToken = async (scope: [String], userid: String): Promise<IVerifyOptions> => {
         let user = await this.db.getUser(userid);
         let payload = {
             iss: config.settings.issuer,
@@ -418,7 +418,7 @@ export class AuthRoutes {
             sub: user?.email ?? config.settings.subject,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
-            scope: scopes,
+            scope: scope,
             email: user?.email,
             claims: user?.claims,
         };

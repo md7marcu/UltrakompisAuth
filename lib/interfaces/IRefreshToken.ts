@@ -3,6 +3,6 @@ export default interface IRefreshToken {
     created: number;
     expires: number;
     clientId: string;
-    scopes: string[];
+    scope: string[];
     userId: string;
 }

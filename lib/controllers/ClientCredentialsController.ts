@@ -23,7 +23,7 @@ export class ClientCredentialsController {
             if (!verifyClient(client, clientAuth.user, clientAuth.password)) {
                 return undefined;
             }
-            let tokenPayload = await this.buildAccessToken(client.clientId, client.scopes);
+            let tokenPayload = await this.buildAccessToken(client.clientId, client.scope);
             let accessToken = signToken(tokenPayload, key);
             db.saveAccessToken(accessToken, clientAuth.user);            
             let refreshToken = getRandomString(config.settings.refreshTokenLength);
@@ -34,20 +34,20 @@ export class ClientCredentialsController {
                     token_type: config.settings.bearerTokenType, 
                     expires_in: config.settings.expiryTime, 
                     refresh_token: refreshToken,
-                    scope: client.scopes
+                    scope: client.scope
             };
         }
         return undefined;
     }
 
-    private buildAccessToken = async (clientId: string, scopes: string[]): Promise<IVerifyOptions> => {
+    private buildAccessToken = async (clientId: string, scope: string[]): Promise<IVerifyOptions> => {
         let payload = {
             iss: config.settings.issuer,
             aud: config.settings.audience,
             sub: clientId,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
-            scope: scopes,
+            scope: scope,
         };
 
         return payload;

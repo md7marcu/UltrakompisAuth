@@ -57,7 +57,7 @@ describe("OIDC authorization code flow", () => {
                 client_id: config.settings.clients[1].clientId,
                 redirect_uri: config.settings.clients[1].redirectUris[0],
                 response_type: "code",
-                scopes: ["openid"],
+                scope: ["openid"],
             });
         expect(response.status).to.be.equal(200);
     });

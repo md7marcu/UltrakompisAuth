@@ -81,7 +81,7 @@ describe("Test Mongoose impl.", () => {
         await new UserModel(user).save();
         await UserModel.findOneAndUpdate({email: user.email},
             {$push: { refreshTokens: { token: expiredAccessToken, created: decodedExpiredAccessToken.iat, expires: decodedExpiredAccessToken.exp,
-                clientId: undefined, scopes: undefined, userId: undefined}}});
+                clientId: undefined, scope: undefined, userId: undefined}}});
         let iat = Date.now() / 1000 - 200;
         let exp = Date.now() / 1000 + 3600;
         let accessToken = "eyLen";
@@ -97,7 +97,7 @@ describe("Test Mongoose impl.", () => {
         let refreshToken = "eyLen";
         await UserModel.findOneAndUpdate({email: user.email},
             {$push: { refreshTokens: { token: refreshToken, created: decodedExpiredAccessToken.iat, expires: decodedExpiredAccessToken.exp,
-                clientId: undefined, scopes: undefined, userId: undefined}}});
+                clientId: undefined, scope: undefined, userId: undefined}}});
 
         let result = await new MongoDb().validateRefreshToken(refreshToken);
 
@@ -110,7 +110,7 @@ describe("Test Mongoose impl.", () => {
         let refreshToken = "eyLen";
         await UserModel.findOneAndUpdate({email: user.email},
             {$push: { refreshTokens: { token: refreshToken, created: decodedExpiredAccessToken.iat, expires: decodedExpiredAccessToken.exp,
-                clientId: undefined, scopes: undefined, userId: undefined}}});
+                clientId: undefined, scope: undefined, userId: undefined}}});
 
         let result = await new MongoDb().validateRefreshToken("not there");
 

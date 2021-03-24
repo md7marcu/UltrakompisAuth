@@ -15,7 +15,7 @@ export const ClientSchema: Schema = new Schema({
         type: String,
         required: false,
     }],
-    scopes: [{
+    scope: [{
         type: String,
     }],
     enabled: {

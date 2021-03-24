@@ -89,18 +89,18 @@ export default class Db {
         }
     }
 
-    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scopes: string[],
+    public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scope: string[],
               publicClient: boolean): Promise<IClient> {
         let client: IClient;
 
         if (this.useMongo) {
-            client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scopes, publicClient);
+            client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scope, publicClient);
         } else {
             client = {
                 clientId: clientId,
                 clientSecret: clientSecret,
                 redirectUris: redirectUris,
-                scopes: scopes,
+                scope: scope,
                 public: publicClient,
                 enabled: true,
             };
@@ -130,15 +130,15 @@ export default class Db {
         this.accessTokens.push({"accessToken": accessToken, "clientId": clientId});
     }
 
-    public saveRefreshToken(refreshToken: string, clientId: string, scopes: string[], userid: string) {
-        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scopes": scopes, "userid": userid});
+    public saveRefreshToken(refreshToken: string, clientId: string, scope: string[], userid: string) {
+        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
     }
 
-    public async saveRefreshTokenToUser(userid: string, refreshToken: string, clientId: string, scopes: string[]) {
+    public async saveRefreshTokenToUser(userid: string, refreshToken: string, clientId: string, scope: string[]) {
         if (this.useMongo) {
-            await new MongoDb().saveRefreshTokenToUser(userid, refreshToken, Date.now() / 1000 - 200, this.maxDate.getTime(), clientId, scopes);
+            await new MongoDb().saveRefreshTokenToUser(userid, refreshToken, Date.now() / 1000 - 200, this.maxDate.getTime(), clientId, scope);
         }
-        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scopes": scopes, "userid": userid});
+        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
     }
 
     public async validRefreshToken(refreshToken: string): Promise<boolean> {

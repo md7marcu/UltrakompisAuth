@@ -30,7 +30,7 @@ describe("Auth routes", () => {
         clientId: "ukauth-client",
         clientSecret: "secretsecretsecret",
         redirectUris: ["https://localhost:3000/authorizeCallback"],
-        scopes: ["ssn", "something", "else"],
+        scope: ["ssn", "something", "else"],
         enabled: true,
     };
 
@@ -38,7 +38,7 @@ describe("Auth routes", () => {
         clientId: "authenticate",
         clientSecret: "othersecret",
         redirectUris: ["https://localhost:3000/authorizeCallback"],
-        scopes: ["weight", "openid"],
+        scope: ["weight", "openid"],
         enabled: true,
     };
 
@@ -84,7 +84,7 @@ describe("Auth routes", () => {
             {
                 client_id: config.settings.clients[0].clientId,
                 redirect_uri: config.settings.clients[0].redirectUris[0],
-                scopes: ["non existing"],
+                scope: ["non existing"],
             });
 
         expect(response.status).to.be.equal(302);
@@ -96,7 +96,7 @@ describe("Auth routes", () => {
             {
                 client_id: config.settings.clients[0].clientId,
                 redirect_uri: config.settings.clients[0].redirectUris[0],
-                scopes: ["ssn"],
+                scope: ["ssn"],
             });
 
         expect(response.status).to.be.equal(200);
@@ -179,7 +179,7 @@ describe("Auth routes", () => {
     it("Should return 200 and token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
+        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
 
         const response = await Supertest(app)
         .post("/token")
@@ -199,7 +199,7 @@ describe("Auth routes", () => {
     it("Should return 200 and token with claims", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
+        db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
 
         const response = await Supertest(app)
         .post("/token")
@@ -222,7 +222,7 @@ describe("Auth routes", () => {
     it("Should return 400 when called with invalid refresh_token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
+        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
         await db.saveRefreshToken("cba321", "3232", ["ssn"], user.email);
 
         const response = await Supertest(app)
@@ -244,7 +244,7 @@ describe("Auth routes", () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
         let refreshToken = "cba321-2";
-        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scopes: ["ssn"]}, scopes: ["ssn"], userid: user.email});
+        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
         await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
 
         const response = await Supertest(app)

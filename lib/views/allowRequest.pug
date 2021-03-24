@@ -16,9 +16,9 @@ block content
                         form(method="POST" action="allowRequest")    
                             input(type="hidden" name="request_id" value=requestId)    
     
-                            if client.scopes     
-                                h5  Allow access to the following scopes:    
-                            each scope, index in client.scopes                       
-                                label.scope-label #[input.checkbox.scope-checkbox(type="checkbox" id=index name="scopes" value=scope checked )] #{scope}    
+                            if client.scope     
+                                h5  Allow access to the following scope:    
+                            each scope, index in client.scope                       
+                                label.scope-label #[input.checkbox.scope-checkbox(type="checkbox" id=index name="scope" value=scope checked )] #{scope}    
                             div    
                             button.btn.btn-primary.col-sm-offset-2(type='submit' name="allow" value="allow") Allow

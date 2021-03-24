@@ -7,7 +7,7 @@ export default interface ISettings {
     authorizationEndpoint: String;
     accessTokenEndpoint: String;
     aliveEndpoint: String;
-    scopes: String;
+    scope: String;
     verifyRedirectUrl: Boolean;
     verifyClientId: Boolean;
     verifyScope: Boolean;
@@ -23,7 +23,7 @@ export default interface ISettings {
             clientId: String;
             clientSecret: String;
             redirectUris: [String];
-            scopes: [String];
+            scope: [String];
         }
     ];
     users: [

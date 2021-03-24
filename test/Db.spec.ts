@@ -19,7 +19,7 @@ describe ("Static Db implementation", () => {
     it ("Should return the client", async () => {
         let client = await new Db().getClient("ukauth-client");
 
-        assert.equal(client.scopes[0], "ssn");
+        assert.equal(client.scope[0], "ssn");
     });
 
     it ("Should save a request", () => {
@@ -77,9 +77,9 @@ describe ("Static Db implementation", () => {
     it ("Should save a refresh token", async () => {
         let refreshToken = "token321";
         let clientId = "Client23";
-        let scopes = ["c", "b"];
+        let scope = ["c", "b"];
         let db = new Db();
-        db.saveRefreshTokenToUser("user.name", refreshToken, clientId, scopes);
+        db.saveRefreshTokenToUser("user.name", refreshToken, clientId, scope);
 
         let validToken = await db.validRefreshToken(refreshToken);
         let refreshTokenData = await db.getRefreshToken(refreshToken);
