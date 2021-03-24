@@ -36,6 +36,7 @@
     "mock-mongoose": "^8.0.1-a",
     "mongoose": "^5.11.11",
     "node-config-ts": "^3.1.0",
+    "node-forge": "^0.10.0",
     "nyc": "^15.1.0",
     "path": "^0.12.7",
     "pug": "^2.0.4",

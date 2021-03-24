@@ -14,6 +14,7 @@ import { compare } from "bcryptjs";
 import verifyCodeChallenge from "../helpers/VerifyCodeChallenge";
 import { ClientCredentialsController } from "../controllers/ClientCredentialsController";
 import signToken from "../helpers/SignToken";
+import { TokenExchangeController } from "../controllers/TokenExchangeController";
 
 export class AuthRoutes {
     private db;
@@ -189,10 +190,22 @@ export class AuthRoutes {
 
             if (req.body?.grant_type === config.settings.clientCredentialsGrant) {
                 let clientCredentialsController = new ClientCredentialsController();
-                let token = await clientCredentialsController.getTokens(this.db, req.headers.authorization);
+                let token = await clientCredentialsController.getTokens(this.db, req?.headers?.authorization, app.httpsOptions.key);
 
                 if (token === undefined){
                     res.status(401).send("Unknown Client or invalid Secret");
+                } else {
+                    res.status(200).send(token);
+                }
+                return;
+            }
+
+            if (req.body?.grant_type === config.settings.tokenExchangeGrant) {
+                let tokenExchangeController = new TokenExchangeController();
+                let token = await tokenExchangeController.getTokens(this.db, req?.headers?.authorization, req?.body, app.httpsOptions.key, app.httpsOptions.cert);
+
+                if (token === undefined) {
+                    res.status(400).send("Unknown error for token exchange.");
                 } else {
                     res.status(200).send(token);
                 }
@@ -251,7 +264,7 @@ export class AuthRoutes {
 
                     if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
                         let payload = await this.buildAccessToken(authorizationCodeRequest.scopes, authorizationCodeRequest?.userid);
-                        let accessToken = signToken(payload);
+                        let accessToken = signToken(payload, app.httpsOptions.key);
                         let scopes = this.getScopesFromRequest(authorizationCodeRequest.request);
                         let openIdConnectFlow = this.isOpenIdConnectFlow(scopes);
 
@@ -287,7 +300,7 @@ export class AuthRoutes {
 
                         if (openIdConnectFlow) {
                             let idToken = await this.buildIdToken(authorizationCodeRequest?.userid,  clientId, this.db);
-                            resultPayload.id_token = signToken(idToken);
+                            resultPayload.id_token = signToken(idToken, app.httpsOptions.key);
                             this.db.saveIdTokenToUser(authorizationCodeRequest?.userid, resultPayload.id_token);
                         }
                         res.status(200).send(resultPayload);
@@ -319,7 +332,7 @@ export class AuthRoutes {
                         return;
                     }
                     let payload = await this.buildAccessToken(refreshTokenData.scopes, refreshTokenData.userId);
-                    let accessToken = signToken(payload);
+                    let accessToken = signToken(payload, app.httpsOptions.key);
 
                     if (config.settings.saveAccessToken) {
                         if (refreshTokenData.userId) {
@@ -402,7 +415,7 @@ export class AuthRoutes {
         let payload = {
             iss: config.settings.issuer,
             aud: config.settings.audience,
-            sub: user?.userId ?? config.settings.subject,
+            sub: user?.email ?? config.settings.subject,
             exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
             scope: scopes,

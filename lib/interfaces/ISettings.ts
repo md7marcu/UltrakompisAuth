@@ -35,13 +35,17 @@ export default interface ISettings {
         }
     ];
     expiryTime: Number;
+    tokenExchangeExpiryTime: Number;
     createdTimeAgo: Number;
     addNonceToAccessToken: Boolean;
     saveAccessToken: Boolean;
     authorizationCodeGrant: String;
     clientCredentialsGrant: String;
     refreshTokenGrant: String;
-    clientCredentialsTokenType: String;
+    tokenExchangeGrant: String;
+    bearerTokenType: string;
+    tokenExchangeSubjectType: string;
     verifyState: Boolean;
     useMongo: Boolean;
+    serverCert: string
 }

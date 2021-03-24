@@ -13,14 +13,17 @@ import * as cors from "cors";
 import { ViewRoutes } from "./routes/ViewRoutes";
 import { ClientRoutes } from "./routes/ClientRoutes";
 import { logger } from "./middleware/middleware";
+import IHttpsOptions from "./interfaces/IHttpsOptions";
 
 export interface IApplication extends express.Application {
     Db: Db;
+    httpsOptions: IHttpsOptions;
 }
 
 export class App {
     public app: IApplication;
     public Db: Db;
+    public httpsOptions: any;
     private authRoutes: AuthRoutes = new AuthRoutes();
     private userRoutes: UserRoutes = new UserRoutes();
     private viewRoutes: ViewRoutes = new ViewRoutes();

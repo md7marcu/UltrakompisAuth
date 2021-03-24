@@ -24,13 +24,16 @@
         "refreshTokenLength": 64,
         "corsWhitelist": ["http://localhost:4200", "http://192.168.86.127:4200", "https://localhost:3000", "https://localhost:3002", "https://192.168.86.127:3002"],
         "expiryTime": 3600,
+        "tokenExchangeExpiryTime": 60,
         "createdTimeAgo": 30,
         "addNonceToAccessToken": true,
         "saveAccessToken": true,
         "authorizationCodeGrant": "authorization_code",
         "clientCredentialsGrant": "client_credentials",        
         "refreshTokenGrant": "refresh_token",
-        "clientCredentialsTokenType": "bearer",
+        "tokenExchangeGrant": "urn:ietf:params:oauth:grant-type:token-exchange",
+        "bearerTokenType": "bearer",
+        "tokenExchangeSubjectType": "urn:ietf:params:oauth:token-type:access_token",
         "verifyState": true,
         "useMongo": true,
         "usePkce": true,
@@ -72,6 +75,7 @@
                 "email": "user2@email.com",
                 "name": "Email Juarez"
             }
-        ]
+        ],
+    "serverCert": "/config/cert.pem"
     }
 }

@@ -23,22 +23,29 @@ declare module "node-config-ts" {
     clearRequestId: boolean
     authorizationCodeLength: number
     accessTokenLength: number
+    removeExpiredAccessTokens: boolean
+    removeExpiredRefreshTokens: boolean
+    removeExpiredIdTokens: boolean
     refreshTokenLength: number
     corsWhitelist: string[]
     expiryTime: number
+    tokenExchangeExpiryTime: number
     createdTimeAgo: number
     addNonceToAccessToken: boolean
     saveAccessToken: boolean
     authorizationCodeGrant: string
     clientCredentialsGrant: string
     refreshTokenGrant: string
-    clientCredentialsTokenType: string
+    tokenExchangeGrant: string
+    bearerTokenType: string
+    tokenExchangeSubjectType: string
     verifyState: boolean
     useMongo: boolean
     usePkce: boolean
     overrideId: string
     clients: Client[]
     users: User[]
+    serverCert: string
   }
   interface User {
     userId: string

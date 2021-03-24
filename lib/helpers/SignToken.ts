@@ -4,6 +4,6 @@ import * as path from "path";
 import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import { config } from "node-config-ts";
 
-export default function signToken(options: IVerifyOptions): string {
-        return sign(options, Fs.readFileSync(path.join(__dirname, "../../config/key.pem")), { algorithm: config.settings.algorithm });
+export default function signToken(options: IVerifyOptions, key:Buffer): string {
+        return sign(options, key, { algorithm: config.settings.algorithm });
 }
