@@ -13,11 +13,11 @@ const debug = Debug("AuthServer:clientAuthController:");
 
 export class ClientCredentialsController {
 
-    public getTokens = async(db: Db, authorizationHeader: string, key: Buffer): Promise<IClientCredentialToken> => {                
+    public getTokens = async(db: Db, authorizationHeader: string, key: Buffer): Promise<IClientCredentialToken> => {
         let client: IClient;
-        let clientAuth: IBasicAuth;
+        let clientAuth: IBasicAuth = getBasicAuth(authorizationHeader);
 
-        if (clientAuth = getBasicAuth(authorizationHeader)){
+        if (clientAuth) {
             client = await db.getClient(clientAuth.user);
 
             if (!verifyClient(client, clientAuth.user, clientAuth.password)) {
@@ -25,16 +25,16 @@ export class ClientCredentialsController {
             }
             let tokenPayload = await this.buildAccessToken(client.clientId, client.scope);
             let accessToken = signToken(tokenPayload, key);
-            db.saveAccessToken(accessToken, clientAuth.user);            
+            db.saveAccessToken(accessToken, clientAuth.user);
             let refreshToken = getRandomString(config.settings.refreshTokenLength);
             db.saveClientRefreshToken(refreshToken, clientAuth.user);
-            
-            return { 
+
+            return {
                     access_token: accessToken,
-                    token_type: config.settings.bearerTokenType, 
-                    expires_in: config.settings.expiryTime, 
+                    token_type: config.settings.bearerTokenType,
+                    expires_in: config.settings.expiryTime,
                     refresh_token: refreshToken,
-                    scope: client.scope
+                    scope: client.scope,
             };
         }
         return undefined;

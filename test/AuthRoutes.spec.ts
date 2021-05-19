@@ -2,6 +2,7 @@ import "mocha";
 import * as Supertest from "supertest";
 import app  from "../lib/app";
 import { VerifyOptions, decode } from "jsonwebtoken";
+import * as fs from "fs";
 import * as Debug from "debug";
 import { expect } from "chai";
 import { config } from "node-config-ts";
@@ -9,6 +10,7 @@ import * as path from "path";
 import { Guid } from "guid-typescript";
 import ClientModel from "../lib/db/ClientModel";
 import UserModel from "../lib/db/UserModel";
+import { HTTP_VERSION_NOT_SUPPORTED } from "http-status-codes";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -17,6 +19,7 @@ interface IVerifyOptions extends VerifyOptions {
 
 describe("Auth routes", () => {
     let db = (app as any).Db;
+
     let user = {
         userId: "12345678",
         password: "verysecret#",
@@ -46,6 +49,7 @@ describe("Auth routes", () => {
         await new ClientModel(ukAuthClient).save();
         await new ClientModel(authClient).save();
         await UserModel.findOneAndUpdate({email: user.email}, user, {new: true, upsert: true});
+        setHttpOptions(app);
         //  Debug.disable();
     });
 
@@ -267,3 +271,10 @@ describe("Auth routes", () => {
         expect((Date.now() / 1000 - token.exp) < 100).to.be.true;
     });
 });
+
+const setHttpOptions = (lapp) => {
+    lapp.httpsOptions = {
+        key: fs.readFileSync("./config/key.pem"),
+        cert: fs.readFileSync("./config/cert.pem"),
+    };
+};

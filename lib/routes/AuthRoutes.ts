@@ -192,7 +192,7 @@ export class AuthRoutes {
                 let clientCredentialsController = new ClientCredentialsController();
                 let token = await clientCredentialsController.getTokens(this.db, req?.headers?.authorization, app.httpsOptions.key);
 
-                if (token === undefined){
+                if (token === undefined) {
                     res.status(401).send("Unknown Client or invalid Secret");
                 } else {
                     res.status(200).send(token);
@@ -202,7 +202,8 @@ export class AuthRoutes {
 
             if (req.body?.grant_type === config.settings.tokenExchangeGrant) {
                 let tokenExchangeController = new TokenExchangeController();
-                let token = await tokenExchangeController.getTokens(this.db, req?.headers?.authorization, req?.body, app.httpsOptions.key, app.httpsOptions.cert);
+                let token = await tokenExchangeController.getTokens(this.db, req?.headers?.authorization,
+                                                                    req?.body, app.httpsOptions.key, app.httpsOptions.cert);
 
                 if (token === undefined) {
                     res.status(400).send("Unknown error for token exchange.");

@@ -14,7 +14,8 @@ const debug = Debug("AuthServer:clientAuthController:");
 
 export class TokenExchangeController {
 
-    public getTokens = async(db: Db, authorizationHeader: string, body: any, key: Buffer, cert: Buffer): Promise<ITokenExchangeToken> => {                
+    // tslint:disable-next-line:max-line-length
+    public getTokens = async(db: Db, authorizationHeader: string, body: any, key: Buffer, cert: Buffer): Promise<ITokenExchangeToken> => {
         let client: IClient;
         let clientAuth: IBasicAuth;
 
@@ -22,7 +23,9 @@ export class TokenExchangeController {
             return undefined; // 401
         }
 
-        if (clientAuth = getBasicAuth(authorizationHeader)){
+        clientAuth = getBasicAuth(authorizationHeader);
+
+        if (clientAuth) {
             client = await db.getClient(clientAuth.user);
 
             if (!verifyClient(client, clientAuth.user, clientAuth.password)) {
@@ -52,9 +55,9 @@ export class TokenExchangeController {
                 access_token: accessToken,
                 issued_token_type: config.settings.tokenExchangeSubjectType,
                 token_type: config.settings.bearerTokenType,
-                expires_in: config.settings.tokenExchangeExpiryTime, 
+                expires_in: config.settings.tokenExchangeExpiryTime,
                 scope: decodedSubjectToken.scope,
-            }
+            };
         }
         return undefined; // 401
     }
@@ -66,12 +69,12 @@ export class TokenExchangeController {
     private buildTokenExchangeToken = (subject: string, clientId: string, scope: string[]): IVerifyOptions => {
         let payload = {
             iss: config.settings.issuer,
-            aud: config.settings.audience, //config.settings.microserviceAudience
+            aud: config.settings.audience, // config.settings.microserviceAudience
             sub: subject,
             exp: Math.floor(Date.now() / 1000) + config.settings.tokenExchangeExpiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
-            act: { 
-                sub: clientId 
+            act: {
+                sub: clientId,
             },
             scope: scope,
         };
