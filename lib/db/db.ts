@@ -116,7 +116,7 @@ export default class Db {
     }
 
     // TODO: Save access token to the client in Mongo - see saveAccessTokenToUser and saveAccessToken below
-    
+
     /* --------------------------------------------- USER --------------------------------------------- */
     public async saveAccessTokenToUser(email: string, accessToken: string) {
         if (this.useMongo) {
