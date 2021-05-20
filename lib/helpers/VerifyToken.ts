@@ -5,7 +5,7 @@ import * as Debug from "debug";
 const debug = Debug("VerifyToken");
 
 export default function verifyToken(token: string, serverCert: Buffer): Boolean {
-    let publicKey = pki.publicKeyToPem(pki.certificateFromPem(serverCert).publicKey);    
+    let publicKey = pki.publicKeyToPem(pki.certificateFromPem(serverCert).publicKey);
     debug(`Server public key: ${JSON.stringify(publicKey)}`);
 
     let decodedToken;
@@ -20,9 +20,8 @@ export default function verifyToken(token: string, serverCert: Buffer): Boolean 
     return true;
 }
 
-
 // Decide what to verify in the token
-function getVerifyOptions(){
+function getVerifyOptions() {
     let verifyOptions: VerifyOptions = {};
 
     if (config.verifyIssuer) {

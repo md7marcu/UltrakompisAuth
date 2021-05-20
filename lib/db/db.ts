@@ -78,12 +78,7 @@ export default class Db {
     // Return client information for given ClientId if available, else undefined
     public async getClient(clientId: string): Promise<IClient> {
         if (this.useMongo) {
-            try {
-                return await new MongoDb().getClient(clientId);
-            } catch (error) {
-                debug(`Could not get client ${clientId}: ${error}`);
-                console.log(`Could not get client ${clientId}: ${error}`);
-            }
+            return await new MongoDb().getClient(clientId);
         } else {
             return find(this.clients, (c) => { return c.clientId === clientId; });
         }
@@ -94,7 +89,9 @@ export default class Db {
         let client: IClient;
 
         if (this.useMongo) {
-            client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scope, publicClient);
+            try {
+                client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scope, publicClient);
+            } catch (err) { throw err; }
         } else {
             client = {
                 clientId: clientId,

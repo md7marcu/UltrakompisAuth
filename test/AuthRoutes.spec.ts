@@ -161,7 +161,7 @@ describe("Auth routes", () => {
             });
 
         expect(response.status).to.be.equal(400);
-        expect(response.text).to.contain("Invalid Grant.");
+        expect(response.text.toLowerCase()).to.contain("Invalid Grant.".toLowerCase());
     });
 
     it("Should return 401 if supplied code is not valid", async () => {

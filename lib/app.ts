@@ -14,6 +14,7 @@ import { ViewRoutes } from "./routes/ViewRoutes";
 import { ClientRoutes } from "./routes/ClientRoutes";
 import { logger } from "./middleware/middleware";
 import IHttpsOptions from "./interfaces/IHttpsOptions";
+import { errorHandler } from "./middleware/Error";
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -41,6 +42,7 @@ export class App {
         this.userRoutes.routes(this.app);
         this.viewRoutes.routes(this.app);
         this.clientRoutes.routes(this.app);
+        this.app.use(errorHandler);
         debug.log = console.log.bind(console);
 
         if (config.settings.useMongo) {

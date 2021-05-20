@@ -17,18 +17,12 @@ export default class MongoDb {
     // --------------------------------------------- USER ---------------------------------------------
     public async removeAuthorizationCodeFromUser(email: string) {
         return await UserModel.findOneAndUpdate({email: email}, { code: ""})
-        .catch((error) => {
-            debug(`Failed to update user ${email} to remove authorization code. Error: ${JSON.stringify(error)}`);
-            return undefined;
-        });
+        .catch((error) => { throw error; });
     }
 
     public async updateUser(email: string, sinceEpoch: number, code: string) {
         return await UserModel.findOneAndUpdate({email: email}, { lastAuthenticated: sinceEpoch.toString(), code: code })
-        .catch((error) => {
-            debug(`Failed to update user ${email} with code ${code}. Error: ${JSON.stringify(error)}`);
-            return undefined;
-        });
+        .catch((error) => { throw error; });
     }
 
     public async addUser(name: string, email: string, password: string, claims: string[]): Promise<IUser> {
@@ -40,11 +34,7 @@ export default class MongoDb {
                 password,
                 claims: claims,
                 enabled: false,
-            }).save()
-                .catch((error) => {
-                    debug(`Failed to add user with email ${email}. err: ${JSON.stringify(error)}`);
-                    return undefined;
-                });
+            }).save();
     }
 
     public async getUser(email: string): Promise<IUser> {
@@ -121,11 +111,7 @@ export default class MongoDb {
         return await SettingsModel.findOneAndUpdate({overrideId: config.settings.overrideId}, localSettings, {
             new: true,
             upsert: true,
-            })
-            .catch((error) => {
-                debug(`Failed to upsert the settings ${JSON.stringify(localSettings)}. err ${JSON.stringify(error)}`);
-                return undefined;
-            });
+            }).catch((error) => { throw error; });
     }
 
     // --------------------------------------------- CLIENT ---------------------------------------------
@@ -140,11 +126,7 @@ export default class MongoDb {
                 scope: scope,
                 public: publicClient,
                 enabled: false,
-            }).save()
-            .catch((error) => {
-                debug(`Failed to add client with id ${clientId}. err: ${JSON.stringify(error)}`);
-                return undefined;
-            });
+            }).save().catch((error) => { throw error; });
     }
     public async getClient(clientId: string): Promise<IClient> {
         return await ClientModel.findOne({clientId: clientId, enabled: true}).lean();

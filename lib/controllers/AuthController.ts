@@ -8,9 +8,7 @@ import IClient from "interfaces/IClient";
 import { findIndex, difference } from "lodash";
 import * as buildUrl from "build-url";
 import { Guid } from "guid-typescript";
-import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import getRandomString from "../helpers/GetRandomString";
-import { compare } from "bcryptjs";
 import { IApplication } from "app";
 import { ClientCredentialsController } from "../controllers/ClientCredentialsController";
 import signToken from "../helpers/SignToken";
@@ -18,10 +16,11 @@ import { TokenExchangeController } from "../controllers/TokenExchangeController"
 import verifyCodeChallenge from "../helpers/VerifyCodeChallenge";
 import { buildUserAccessToken } from "../helpers/BuildAccessToken";
 import buildIdToken from "../helpers/BuildIdToken";
+import { ErrorResponse } from "../helpers/ErrorResponse";
 
 export class AuthController {
 
-    public async root(req: IRequest, res: Response) {
+    public async root(req: IRequest, res: Response, next: NextFunction) {
         res.render("index",
         {
             title: "Authorization Server",
@@ -33,11 +32,11 @@ export class AuthController {
         });
     }
 
-    public async alive(req: IRequest, res: Response) {
+    public async alive(req: IRequest, res: Response, next: NextFunction) {
         res.send("Success!");
     }
 
-    public async authorize(req: IRequest, res: Response, database: Db) {
+    public async authorize(req: IRequest, res: Response, next: NextFunction, database: Db) {
         // 1. Verify ClientId
         let client: IClient = await database.getClient(((req?.query?.client_id ?? "") as string));
 
@@ -97,7 +96,7 @@ export class AuthController {
         }
     }
 
-    public async allowRequest(req: Request, res: Response, database: Db) {
+    public async allowRequest(req: Request, res: Response, next: NextFunction, database: Db) {
         let query;
         let requestId;
 
@@ -185,7 +184,7 @@ export class AuthController {
         }
     }
 
-    public async token(req: Request, res: Response, app: IApplication) {
+    public async token(req: Request, res: Response, next: NextFunction, app: IApplication) {
         let clientId: string;
         let clientSecret: string;
 
@@ -194,7 +193,7 @@ export class AuthController {
             let token = await clientCredentialsController.getTokens(app.Db, req?.headers?.authorization, app.httpsOptions.key);
 
             if (token === undefined) {
-                res.status(401).send("Unknown Client or invalid Secret");
+                next(new ErrorResponse("Unknown Client or invalid Secret", 401));
             } else {
                 res.status(200).send(token);
             }
@@ -207,7 +206,7 @@ export class AuthController {
                                                                 req?.body, app.httpsOptions.key, app.httpsOptions.cert);
 
             if (token === undefined) {
-                res.status(400).send("Unknown error for token exchange.");
+                next(new ErrorResponse("Unknown error for token exchange.", 400));
             } else {
                 res.status(200).send(token);
             }
@@ -223,7 +222,7 @@ export class AuthController {
             // basic auth clientid:clientsecret	var headers = {
             // header "Authorization": "Basic "  + client_id ":" client_secret
             debug(`Client id or secret are invalid ${req.body.client_id}/`);
-            res.status(401).send(`Client id or secret are invalid ${req.body.client_id}`);
+            next(new ErrorResponse(`Client id or secret are invalid ${req.body.client_id}`, 401));
 
             return;
         }
@@ -232,13 +231,13 @@ export class AuthController {
 
         if (!client) {
             debug(`Could not find client: ${clientId}`);
-            res.status(401).send("Invalid client.");
+            next(new ErrorResponse("Invalid client.", 401));
 
             return;
         }
         if (!client.public && client.clientSecret !== clientSecret) {
             debug(`Invalid client secret: ${clientSecret}`);
-            res.status(401).send("Invalid client secret.");
+            next(new ErrorResponse("Invalid client secret.", 401));
 
             return;
         }
@@ -251,7 +250,7 @@ export class AuthController {
             // fresh or replayed token
             if (config.settings.verifyCode && !app.Db.validAuthorizationCode(code)) {
                 debug(`Authorization Code is invalid (authorization_code/code): ${req.body.authorization_code} / ${req.body.code}`);
-                res.status(401).send("Invalid code.");
+                next(new ErrorResponse("Invalid code.", 401));
 
                 return;
             }
@@ -280,7 +279,8 @@ export class AuthController {
 
                         if (!verifyCodeChallenge(codeChallenge, reqCodeChallenge)) {
                             debug(`CodeChallenge does not matched stored CodeChallenge: ${reqCodeChallenge} / ${codeChallenge}`);
-                            res.status(400).send("Invalid Code Challenge");
+                            next(new ErrorResponse("Invalid Code Challenge.", 400));
+
                             return;
                         }
                     }
@@ -311,16 +311,16 @@ export class AuthController {
                     return;
                 } else {
                     debug(`Client id does not match stored client id: ${authorizationCodeRequest.request.client_id}/${clientId}`);
-                    res.status(400).send("Invalid grant.");
+                    next(new ErrorResponse("Invalid grant.", 400));
 
                     return;
                 }
             } else {
                 debug(`Could not find code in storage ${authorizationCodeRequest}`);
-                res.status(400).send("Invalid grant.");
+                next(new ErrorResponse("Invalid grant.", 400));
 
-            return;
-        }
+                return;
+            }
         } else if (req.body.grant_type === config.settings.refreshTokenGrant) {
             // Check if we have the refresh token (with related data), i.e. valid refresh token
             let refreshTokenData = await app.Db.getRefreshToken(req?.body?.refresh_token ?? "");
@@ -330,7 +330,7 @@ export class AuthController {
 
                 if (config.settings.verifyClientIdOnRefreshToken && refreshTokenData.clientId !== clientId) {
                      debug("Client mismatch on refresh token.");
-                     res.status(400).send("Invalid client on refresh token.");
+                     next(new ErrorResponse("Invalid client on refresh token.", 400));
 
                     return;
                 }
@@ -348,13 +348,13 @@ export class AuthController {
                 res.status(200).send({access_token: accessToken, refresh_token: refreshTokenData.token });
             } else {
                 debug("Called with invalid refresh token.");
-                res.status(400).send("Called with invalid refresh token.");
+                next(new ErrorResponse("Called with invalid refresh token.", 400));
 
                 return;
             }
         } else {
             debug("Called with invalid grant.");
-            res.status(400).send("Invalid Grant.");
+            next(new ErrorResponse("Invalid grant.", 400));
 
             return;
         }
