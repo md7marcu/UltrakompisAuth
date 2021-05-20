@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import * as Debug from "debug";
 import { IApplication } from "../app";
-const debug = Debug("AuthServer:ClientRoutes:");
 import Db from "../db/db";
 import { clientController } from "../controllers/ClientController";
 
