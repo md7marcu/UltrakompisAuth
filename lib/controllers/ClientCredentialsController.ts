@@ -2,13 +2,13 @@ import * as Debug from "debug";
 import Db from "../db/db";
 import IClient from "interfaces/IClient";
 import { config } from "node-config-ts";
-import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import getRandomString from "../helpers/GetRandomString";
 import signToken from "../helpers/SignToken";
 import IClientCredentialToken from "../interfaces/IClientCredentialToken";
 import IBasicAuth from "../interfaces/IBasicAuth";
 import verifyClient from "../helpers/VerifyClient";
 import getBasicAuth from "../helpers/GetBasicAuth";
+import { buildClientAccessToken } from "../helpers/BuildAccessToken";
 const debug = Debug("AuthServer:clientAuthController:");
 
 export class ClientCredentialsController {
@@ -23,7 +23,7 @@ export class ClientCredentialsController {
             if (!verifyClient(client, clientAuth.user, clientAuth.password)) {
                 return undefined;
             }
-            let tokenPayload = await this.buildAccessToken(client.clientId, client.scope);
+            let tokenPayload = await buildClientAccessToken(client.clientId, client.scope);
             let accessToken = signToken(tokenPayload, key);
             db.saveAccessToken(accessToken, clientAuth.user);
             let refreshToken = getRandomString(config.settings.refreshTokenLength);
@@ -38,18 +38,5 @@ export class ClientCredentialsController {
             };
         }
         return undefined;
-    }
-
-    private buildAccessToken = async (clientId: string, scope: string[]): Promise<IVerifyOptions> => {
-        let payload = {
-            iss: config.settings.issuer,
-            aud: config.settings.audience,
-            sub: clientId,
-            exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
-            iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
-            scope: scope,
-        };
-
-        return payload;
     }
 }
