@@ -6,8 +6,8 @@ import * as Debug from "debug";
 import { decode } from "jsonwebtoken";
 import MongoDb from "../lib/db/MongoDb";
 
-describe.skip("Test Mongoose impl.", () => {
-// describe("Test Mongoose impl.", () => {
+// describe.skip("Test Mongoose impl.", () => {
+describe("Test Mongoose impl.", () => {
     let user: IUser = {
         name: "Test",
         password: "secret",
