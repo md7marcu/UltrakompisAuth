@@ -15,6 +15,7 @@ import { ClientRoutes } from "./routes/ClientRoutes";
 import { logger } from "./middleware/middleware";
 import IHttpsOptions from "./interfaces/IHttpsOptions";
 import { errorHandler } from "./middleware/Error";
+import { textChangeRangeIsUnchanged } from "typescript";
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -110,6 +111,7 @@ export class App {
                     debug(`Unable to connect to mongodb @${connectionString}, error: ${error}`),
                 );
             });
+
         } else {
             // Use the MongoDB drivers upsert method instead of mongooses
             mongoose.set("useFindAndModify", false);
