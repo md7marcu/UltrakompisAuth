@@ -8,14 +8,13 @@ import Db from "./db/db";
 import * as mongoose from "mongoose";
 import * as Debug from "debug";
 const debug = Debug("AuthServer:");
-import * as MockMongoose from "mock-mongoose";
 import * as cors from "cors";
 import { ViewRoutes } from "./routes/ViewRoutes";
 import { ClientRoutes } from "./routes/ClientRoutes";
 import { logger } from "./middleware/middleware";
 import IHttpsOptions from "./interfaces/IHttpsOptions";
 import { errorHandler } from "./middleware/Error";
-import { textChangeRangeIsUnchanged } from "typescript";
+import { MongoMemoryServer } from "mongodb-memory-server";
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -97,21 +96,30 @@ export class App {
     private mongoSetup = (connectionString: string, isDev: boolean): void => {
 
         if (isDev) {
-            const mockMongoose = new MockMongoose.MockMongoose(mongoose);
-            console.log("Using Mocked Mongoose.");
+            const mongoServer = new MongoMemoryServer();
+            mongoServer.getUri().then((mongoUri) => {
+              const mongooseOpts = {
+                autoReconnect: true,
+                reconnectTries: Number.MAX_VALUE,
+                reconnectInterval: 1000,
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+              };
+              mongoose.set("useFindAndModify", false);
+              mongoose.connect(mongoUri, mongooseOpts);
 
-            mockMongoose.prepareStorage().then( () => {
-                mongoose.set("useFindAndModify", false);
-                mongoose.connect(connectionString, {
-                    useNewUrlParser: true,
-                    useCreateIndex: true,
-                    useUnifiedTopology: true,
-                }).
-                catch(error =>
-                    debug(`Unable to connect to mongodb @${connectionString}, error: ${error}`),
-                );
+              mongoose.connection.on("error", (e) => {
+                if (e.message.code === "ETIMEDOUT") {
+                  console.log(e);
+                  mongoose.connect(mongoUri, mongooseOpts);
+                }
+                console.log(e);
+              });
+
+              mongoose.connection.once("open", () => {
+                console.log(`MongoDB successfully connected to ${mongoUri}`);
+              });
             });
-
         } else {
             // Use the MongoDB drivers upsert method instead of mongooses
             mongoose.set("useFindAndModify", false);
