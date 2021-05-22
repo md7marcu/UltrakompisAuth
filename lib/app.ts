@@ -99,9 +99,6 @@ export class App {
             const mongoServer = new MongoMemoryServer();
             mongoServer.getUri().then((mongoUri) => {
               const mongooseOpts = {
-                autoReconnect: true,
-                reconnectTries: Number.MAX_VALUE,
-                reconnectInterval: 1000,
                 useNewUrlParser: true,
                 useUnifiedTopology: true,
               };

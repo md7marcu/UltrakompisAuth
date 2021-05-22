@@ -10,7 +10,6 @@ import * as path from "path";
 import { Guid } from "guid-typescript";
 import ClientModel from "../lib/db/ClientModel";
 import UserModel from "../lib/db/UserModel";
-import { HTTP_VERSION_NOT_SUPPORTED } from "http-status-codes";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
