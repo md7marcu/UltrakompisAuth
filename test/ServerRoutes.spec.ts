@@ -7,7 +7,8 @@ import { config } from "node-config-ts";
 
 describe("Server routes", () => {
     let wellKnownSettings;
-    let serverKid = "PInJ1JPDMcH4oXyI-1LJJpP6R3ezXdExCBHlVaIwjDc";
+    // let serverKid = "PInJ1JPDMcH4oXyI-1LJJpP6R3ezXdExCBHlVaIwjDc";
+    let serverKid = "PCJRsp7ReGptQgyN6D_9OsqMZ9akBfKbrOW23iAaXtM";
 
     beforeEach( async() => {
         Debug.disable();
