@@ -47,5 +47,7 @@ export default interface ISettings {
     tokenExchangeSubjectType: string;
     verifyState: Boolean;
     useMongo: Boolean;
-    serverCert: string
+    serverCert: string;
+    jwkAlgorithm: string;
+    jwkUse: string;
 }

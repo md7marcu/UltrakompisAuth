@@ -6,22 +6,32 @@ import * as Debug from "debug";
 import { config } from "node-config-ts";
 
 describe("Server routes", () => {
-    let wellKnown;
+    let wellKnownSettings;
+    let serverKid = "PInJ1JPDMcH4oXyI-1LJJpP6R3ezXdExCBHlVaIwjDc";
 
-    before( async() => {
+    beforeEach( async() => {
         Debug.disable();
-        console.log(config.settings);
-        wellKnown = config.wellKnown;
-        wellKnown.issuer = "";
-        wellKnown.authorization_endpoint = config.settings.authorizationEndpoint;
-        wellKnown.token_endpoint = config.settings.accessTokenEndpoint;
-        wellKnown.userinfo_endpoint = "";
-        wellKnown.revocation_endpoint = "";
+        wellKnownSettings = config.wellKnown;
+        wellKnownSettings.issuer = config.settings.issuer;
+        wellKnownSettings.authorization_endpoint = config.settings.authorizationEndpoint;
+        wellKnownSettings.token_endpoint = config.settings.accessTokenEndpoint;
+        wellKnownSettings.jwks_uri = config.settings.jwksEndpoint;
+        wellKnownSettings.userinfo_endpoint = "";
+        wellKnownSettings.revocation_endpoint = "";
     });
 
     it("Should return 200 when retrieving well-known", async () => {
+        let testWellKnown = JSON.stringify(wellKnownSettings);
         const response = await Supertest(app)
             .get("/.well-known/openid-configuration");
-        expect(JSON.stringify(JSON.parse(response.text))).to.be.equal(JSON.stringify(wellKnown));
+        expect(JSON.stringify(JSON.parse(response.text))).to.be.equal(testWellKnown);
+    });
+
+    it("Should return 200 and server certificate", async () => {
+        let response = await Supertest(app)
+        .get("/oauth2/certs");
+
+        expect(response.status).equal(200);
+        expect(JSON.parse(response.text).keys[0].kid).to.be.equal(serverKid);
     });
 });

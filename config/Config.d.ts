@@ -11,7 +11,6 @@ declare module "node-config-ts" {
     device_authorization_endpoint: string
     token_endpoint: string
     userinfo_endpoint: string
-    revocation_endpoint: string
     jwks_uri: string
     response_types_supported: string[]
     subject_types_supported: string[]
@@ -29,6 +28,7 @@ declare module "node-config-ts" {
     authorizationEndpoint: string
     accessTokenEndpoint: string
     aliveEndpoint: string
+    jwksEndpoint: string
     scope: string
     verifyRedirectUrl: boolean
     verifyClientId: boolean
@@ -63,6 +63,8 @@ declare module "node-config-ts" {
     clients: Client[]
     users: User[]
     serverCert: string
+    jwkAlgorithm: string
+    jwkUse: string
   }
   interface User {
     userId: string

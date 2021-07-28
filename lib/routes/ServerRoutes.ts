@@ -12,5 +12,9 @@ export class ServerRoutes {
         app.get("/.well-known/openid-configuration", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             serverController.wellKnown(req, res, next, db);
         }));
+
+        app.get("/oauth2/certs", asyncHandler((req: Request, res: Response, next: NextFunction) => {
+            serverController.certs(req, res, next, app.httpsOptions.cert);
+        }));
     }
 }
