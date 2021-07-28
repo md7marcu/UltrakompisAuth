@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as Debug from "debug";
-const debug = Debug("AuthServer:ClientRoutes:");
+const debug = Debug("AuthServer:ClientController");
 import Db from "../db/db";
 import IClient from "interfaces/IClient";
 

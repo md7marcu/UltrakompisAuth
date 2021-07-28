@@ -1,9 +1,9 @@
 // lib/app.ts
 import { config } from "node-config-ts";
 import * as express from "express";
-import * as bodyParser from "body-parser";
 import { AuthRoutes } from "./routes/AuthRoutes";
 import { UserRoutes } from "./routes/UserRoutes";
+import { ServerRoutes } from "./routes/ServerRoutes";
 import Db from "./db/db";
 import * as mongoose from "mongoose";
 import * as Debug from "debug";
@@ -29,6 +29,7 @@ export class App {
     private userRoutes: UserRoutes = new UserRoutes();
     private viewRoutes: ViewRoutes = new ViewRoutes();
     private clientRoutes: ClientRoutes = new ClientRoutes();
+    private serverRoutes: ServerRoutes = new ServerRoutes();
     private mongoUrl: string = process.env.MONGODB_URL;
     private isDev: boolean = process.env.NODE_ENV === "test";
 
@@ -41,6 +42,7 @@ export class App {
         this.authRoutes.routes(this.app);
         this.userRoutes.routes(this.app);
         this.viewRoutes.routes(this.app);
+        this.serverRoutes.routes(this.app);
         this.clientRoutes.routes(this.app);
         this.app.use(errorHandler);
         debug.log = console.log.bind(console);
@@ -63,11 +65,10 @@ export class App {
     }
 
     private localConfig = (): void => {
-        // support application/json type post data
-        this.app.use(bodyParser.json());
         // support application/x-www-form-urlencoded post data
-        this.app.use(bodyParser.urlencoded({ extended: false }));
+        this.app.use(express.urlencoded({ extended: false }));
         // serve static content
+        this.app.use(express.json());
         this.app.use(express.static("public"));
         // logger request middle ware
         this.app.use(logger);

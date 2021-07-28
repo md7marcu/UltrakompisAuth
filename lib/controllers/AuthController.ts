@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction  } from "express";
 import { IRequest } from "../interfaces/IRequest";
 import * as Debug from "debug";
-const debug = Debug("AuthServer:ClientRoutes:");
+const debug = Debug("AuthServer:AuthController");
 import Db from "../db/db";
 import { config } from "node-config-ts";
 import IClient from "interfaces/IClient";

@@ -10,7 +10,7 @@ import verifyClient from "../helpers/VerifyClient";
 import getBasicAuth from "../helpers/GetBasicAuth";
 import verifyToken from "../helpers/VerifyToken";
 import { decode } from "jsonwebtoken";
-const debug = Debug("AuthServer:clientAuthController:");
+const debug = Debug("AuthServer:TokenExchangeController:");
 
 export class TokenExchangeController {
 

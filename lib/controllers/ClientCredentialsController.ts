@@ -9,7 +9,7 @@ import IBasicAuth from "../interfaces/IBasicAuth";
 import verifyClient from "../helpers/VerifyClient";
 import getBasicAuth from "../helpers/GetBasicAuth";
 import { buildClientAccessToken } from "../helpers/BuildAccessToken";
-const debug = Debug("AuthServer:clientAuthController:");
+const debug = Debug("AuthServer:ClientCredentialsController:");
 
 export class ClientCredentialsController {
 
