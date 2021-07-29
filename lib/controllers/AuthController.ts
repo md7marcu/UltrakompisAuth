@@ -265,8 +265,14 @@ export class AuthController {
 
                 if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
                     let user = await app.Db.getUser(authorizationCodeRequest?.userid);
-                    let payload = await buildUserAccessToken(authorizationCodeRequest.scope, user);
-                    let accessToken = signToken(payload, app.httpsOptions.key);
+                    let accessToken: string;
+
+                    if (config.settings.opaqueAccessToken) {
+                        accessToken = Guid.create().toString();
+                    } else {
+                        let payload = await buildUserAccessToken(authorizationCodeRequest.scope, user);
+                        accessToken = signToken(payload, app.httpsOptions.key);
+                    }
                     let scope = this.getScopeFromRequest(authorizationCodeRequest.request);
                     let openIdConnectFlow = this.isOpenIdConnectFlow(scope);
 
@@ -335,8 +341,14 @@ export class AuthController {
                     return;
                 }
                 let user = await app.Db.getUser(refreshTokenData.userId);
-                let payload = await buildUserAccessToken(refreshTokenData.scope, user);
-                let accessToken = signToken(payload, app.httpsOptions.key);
+                let accessToken: string;
+
+                if (config.settings.opaqueAccessToken) {
+                    accessToken = Guid.create().toString();
+                } else {
+                    let payload = await buildUserAccessToken(refreshTokenData.scope, user);
+                    accessToken = signToken(payload, app.httpsOptions.key);
+                }
 
                 if (config.settings.saveAccessToken) {
                     if (refreshTokenData.userId) {

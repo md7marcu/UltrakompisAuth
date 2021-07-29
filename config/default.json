@@ -79,7 +79,8 @@
         ],
     "serverCert": "/config/cert.pem",
     "jwkAlgorithm": "RS256",
-    "jwkUse": "sig"
+    "jwkUse": "sig",
+    "opaqueAccessToken": false
     },
     "wellKnown": {
         "issuer": "",

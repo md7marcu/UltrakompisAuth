@@ -53,6 +53,8 @@ describe("Auth routes", () => {
     });
 
     beforeEach(() => {
+        // Global change when set to true in test
+        config.settings.opaqueAccessToken = false;
         // Setup fake rendering
         app.set("views", path.join(__dirname, "../lib/views"));
         app.set("view engine", "pug");
@@ -197,6 +199,28 @@ describe("Auth routes", () => {
 
         expect(response.status).to.be.equal(200);
         expect(response.text).to.contain("refresh_token");
+    });
+
+    it("Should return 200 and opaque token if configured", async () => {
+        let code = "abc123";
+        let clientId = config.settings.clients[0].clientId;
+        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
+        config.settings.opaqueAccessToken = true;
+
+        const response = await Supertest(app)
+        .post("/token")
+        .type("form")
+        .send(
+            {
+                client_id: clientId,
+                client_secret: config.settings.clients[0].clientSecret,
+                grant_type: config.settings.authorizationCodeGrant,
+                authorization_code: code,
+            });
+
+        expect(response.status).to.be.equal(200);
+        let accessToken = JSON.parse(response.text).access_token;
+        expect(accessToken.length).to.be.equal(36);
     });
 
     it("Should return 200 and token with claims", async () => {

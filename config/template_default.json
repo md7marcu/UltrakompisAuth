@@ -7,6 +7,7 @@
         "authorizationEndpoint": "https://localhost:3002/authorize",
         "accessTokenEndpoint": "https://localhost:3002/token",
         "aliveEndpoint": "https://localhost:3002/alive",
+        "jwksEndpoint": "https://localhost:3002/oauth2/certs",
         "scope": "ssn",
         "verifyRedirectUrl": true,
         "verifyClientId": true,
@@ -68,6 +69,23 @@
                 "name": "Email Juarez"
             }
         ],
-        "serverCert": "/config/cert.pem"
-    }
+        "serverCert": "/config/cert.pem",
+        "jwkAlgorithm": "RS256",
+        "jwkUse": "sig",
+        "opaqueAccessToken": false
+        },
+        "wellKnown": {
+            "issuer": "",
+            "authorization_endpoint": "",
+            "token_endpoint": "",
+            "userinfo_endpoint": "",
+            "jwks_uri": "",
+            "response_types_supported": ["code"],
+            "subject_types_supported": ["openid"],
+            "scopes_supported": ["openid"],
+            "token_endpoint_auth_methods_supported": ["client_secret_post"],
+            "claims_supported": ["iss", "aud", "sub", "exp", "iat", "act"],
+            "code_challenge_methods_supported": ["S256"],
+            "grant_types_supported": ["authorization_code", "refresh_token"]
+        }
 }

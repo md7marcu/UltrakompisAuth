@@ -65,6 +65,7 @@ declare module "node-config-ts" {
     serverCert: string
     jwkAlgorithm: string
     jwkUse: string
+    opaqueAccessToken: boolean
   }
   interface User {
     userId: string
