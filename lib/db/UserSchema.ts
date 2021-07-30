@@ -3,6 +3,11 @@ import isEmail  from "validator/lib/isEmail";
 import { hashSync, genSaltSync } from "bcryptjs";
 
 export const UserSchema: Schema = new Schema({
+    userId: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     name: {
         type: String,
         required: true,

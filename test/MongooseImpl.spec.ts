@@ -9,6 +9,7 @@ import MongoDb from "../lib/db/MongoDb";
 // describe.skip("Test Mongoose impl.", () => {
 describe("Test Mongoose impl.", () => {
     let user: IUser = {
+        userId: "1234",
         name: "Test",
         password: "secret",
         email: "test@test.nu",
@@ -57,7 +58,7 @@ describe("Test Mongoose impl.", () => {
         let exp = Date.now() / 1000 + 3600;
         let accessToken = "eyLen";
 
-        await new MongoDb().saveAccessTokenToUser(user.email, accessToken, {exp: exp, iat: iat});
+        await new MongoDb().saveAccessTokenToUser(user.userId, accessToken, {exp: exp, iat: iat});
         let savedUser: IUser = await UserModel.findOne({email: user.email}).lean();
 
         expect(savedUser.accessTokens[0].expires).to.equal(exp);
@@ -71,7 +72,7 @@ describe("Test Mongoose impl.", () => {
         let exp = Date.now() / 1000 + 3600;
         let accessToken = "eyLen";
 
-        await new MongoDb().saveIdTokenToUser(user.email, accessToken, {exp: exp, iat: iat});
+        await new MongoDb().saveIdTokenToUser(user.userId, accessToken, {exp: exp, iat: iat});
         let savedUser: IUser = await UserModel.findOne({email: user.email}).lean();
 
         expect(savedUser.idTokens[0].expires).to.equal(exp);
@@ -86,7 +87,7 @@ describe("Test Mongoose impl.", () => {
         let exp = Date.now() / 1000 + 3600;
         let accessToken = "eyLen";
 
-        await new MongoDb().saveRefreshTokenToUser(user.email, accessToken, iat, exp, undefined, undefined);
+        await new MongoDb().saveRefreshTokenToUser(user.userId, accessToken, iat, exp, undefined, undefined);
         let savedUser: IUser = await UserModel.findOne({email: user.email}).lean();
 
         expect(savedUser.refreshTokens[0].expires).to.equal(exp);

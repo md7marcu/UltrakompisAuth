@@ -3,7 +3,7 @@ import IIdToken  from "./IIdToken";
 import IRefreshToken from "./IRefreshToken";
 
 export default interface IUser {
-    userId?: string;
+    userId: string;
     password: string;
     email: string;
     name: string;

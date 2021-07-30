@@ -20,7 +20,7 @@ export class UserController {
     public async authenticateUser(req: Request, res: Response, next: NextFunction, database: Db) {
         debug (`Login User: ${JSON.stringify(req.body)}`);
         try {
-            let user = await database.getUser(req?.body?.email);
+            let user = await database.getUserByEmail(req?.body?.email);
 
             let validPassword = undefined;
 

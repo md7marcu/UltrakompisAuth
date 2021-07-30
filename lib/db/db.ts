@@ -115,12 +115,12 @@ export default class Db {
     // TODO: Save access token to the client in Mongo - see saveAccessTokenToUser and saveAccessToken below
 
     /* --------------------------------------------- USER --------------------------------------------- */
-    public async saveAccessTokenToUser(email: string, accessToken: string) {
+    public async saveAccessTokenToUser(userId: string, accessToken: string) {
         if (this.useMongo) {
             let decodedToken = (decode(accessToken) as any);
-            await new MongoDb().saveAccessTokenToUser(email, accessToken, decodedToken);
+            await new MongoDb().saveAccessTokenToUser(userId, accessToken, decodedToken);
         }
-        this.accessTokens.push({"accessToken": accessToken, "email": email});
+        this.accessTokens.push({"accessToken": accessToken, "userId": userId});
     }
 
     public saveAccessToken(accessToken: string, clientId: string) {
@@ -162,13 +162,13 @@ export default class Db {
         this.idTokens.push({idToken: idToken, userId: userid});
     }
 
-    public async updateUser(email: string, sinceEpoch: number, code: string) {
+    public async updateUser(userId: string, sinceEpoch: number, code: string) {
         let user: IUser;
 
         if (this.useMongo) {
-            await new MongoDb().updateUser(email, sinceEpoch, code);
+            await new MongoDb().updateUser(userId, sinceEpoch, code);
         } else {
-            let index = this.users.findIndex(u => u.name === email);
+            let index = this.users.findIndex(u => u.name === userId);
             this.users[index].lastAuthenticated = sinceEpoch.toString();
             this.users[index].code = code;
         }
@@ -186,7 +186,7 @@ export default class Db {
             user = await new MongoDb().addUser(name, email, hashedPassword, claims);
         } else {
             user = {
-                userId: getRandomString(8),
+                userId: Guid.create().toString(),
                 name: name,
                 email: email,
                 password: hashedPassword,
@@ -199,14 +199,21 @@ export default class Db {
         return user;
     }
 
-    public async getUser(email: string): Promise<IUser> {
+    public async getUser(userId: string): Promise<IUser> {
         if (this.useMongo) {
-            return await new MongoDb().getUser(email);
+            return await new MongoDb().getUser(userId);
+        } else {
+            return find(this.users, (u) => u.userId === userId);
+        }
+    }
+
+    public async getUserByEmail(email: string): Promise<IUser> {
+        if (this.useMongo) {
+            return await new MongoDb().getUserByEmail(email);
         } else {
             return find(this.users, (u) => u.email === email);
         }
     }
-
     /* --------------------------------------------- SETTINGS --------------------------------------------- */
     public async getSettings(): Promise<ISettings> {
         if (this.useMongo) {

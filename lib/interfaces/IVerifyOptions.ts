@@ -7,4 +7,5 @@ export interface IVerifyOptions extends VerifyOptions {
     sub: string;
     exp: number;
     iat: number;
+    email?: string;
 }

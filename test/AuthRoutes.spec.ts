@@ -184,7 +184,7 @@ describe("Auth routes", () => {
     it("Should return 200 and token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
+        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.userId});
 
         const response = await Supertest(app)
         .post("/token")
@@ -204,7 +204,7 @@ describe("Auth routes", () => {
     it("Should return 200 and opaque token if configured", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
+        db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.userId});
         config.settings.opaqueAccessToken = true;
 
         const response = await Supertest(app)
@@ -226,7 +226,7 @@ describe("Auth routes", () => {
     it("Should return 200 and token with claims", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
+        db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.userId});
 
         const response = await Supertest(app)
         .post("/token")
@@ -249,8 +249,8 @@ describe("Auth routes", () => {
     it("Should return 400 when called with invalid refresh_token", async () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
-        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
-        await db.saveRefreshToken("cba321", "3232", ["ssn"], user.email);
+        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.userId});
+        await db.saveRefreshToken("cba321", "3232", ["ssn"], user.userId);
 
         const response = await Supertest(app)
         .post("/token")
@@ -271,8 +271,8 @@ describe("Auth routes", () => {
         let code = "abc123";
         let clientId = config.settings.clients[0].clientId;
         let refreshToken = "cba321-2";
-        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.email});
-        await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
+        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], userid: user.userId});
+        await db.saveRefreshTokenToUser(user.userId, refreshToken, clientId, ["ssn"]);
 
         const response = await Supertest(app)
         .post("/token")

@@ -388,7 +388,7 @@ export class AuthController {
     }
 
     private getScopeFromRequest = (request: any) => {
-        return request.scope ?? request.scope;
+        return request.scope ?? request.scopes;
     }
 
     // Verify that the client has all scope that's asked for

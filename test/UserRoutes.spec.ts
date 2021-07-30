@@ -17,6 +17,7 @@ describe("User routes", () => {
     const testEmail: string = "TestEmail@test.nu";
 
     let user = {
+        userId: "12345678",
         password: "verysecret#",
         email: "user@email.com",
         name: "Email Juarez",

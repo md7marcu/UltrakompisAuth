@@ -9,6 +9,7 @@ import IIdToken from "interfaces/IIdToken";
 import IRefreshToken from "interfaces/IRefreshToken";
 import ClientModel from "./ClientModel";
 import IClient from "interfaces/IClient";
+import { Guid } from "guid-typescript";
 
 const debug = Debug("AuthServer:MongoDB");
 debug.log = console.log.bind(console);
@@ -28,6 +29,7 @@ export default class MongoDb {
     public async addUser(name: string, email: string, password: string, claims: string[]): Promise<IUser> {
         return await new UserModel(
             {
+                userId: Guid.create().toString(),
                 name: name,
                 email: email,
                 password:
@@ -37,43 +39,47 @@ export default class MongoDb {
             }).save();
     }
 
-    public async getUser(email: string): Promise<IUser> {
+    public async getUser(userId: string): Promise<IUser> {
+        return await UserModel.findOne({userId: userId, enabled: true}).lean();
+    }
+
+    public async getUserByEmail(email: string): Promise<IUser> {
         return await UserModel.findOne({email: email, enabled: true}).lean();
     }
 
-    public async saveAccessTokenToUser(email: string, accessToken: string, decodedToken: any) {
+    public async saveAccessTokenToUser(userId: string, accessToken: string, decodedToken: any) {
         let token: IAccessToken = {token: accessToken, created: decodedToken?.iat, expires: decodedToken?.exp};
 
-        await UserModel.findOneAndUpdate({email: email},
+        await UserModel.findOneAndUpdate({userId: userId},
                 {$push: { accessTokens: { token: accessToken, created: decodedToken.iat, expires: decodedToken.exp}}});
 
         if (config.settings.removeExpiredAccessTokens) {
-            await UserModel.findOneAndUpdate({email: email},
+            await UserModel.findOneAndUpdate({userId: userId},
                 {$pull: { accessTokens: { expires: { $lt: (Date.now() / 1000)}}}});
         }
     }
 
-    public async saveIdTokenToUser(email: string, idToken: string, decodedToken: any) {
+    public async saveIdTokenToUser(userId: string, idToken: string, decodedToken: any) {
         let token: IIdToken = {token: idToken, created: decodedToken?.iat, expires: decodedToken?.exp};
 
-        await UserModel.findOneAndUpdate({email: email},
+        await UserModel.findOneAndUpdate({userId: userId},
                 {$push: { idTokens: { token: idToken, created: decodedToken.iat, expires: decodedToken.exp}}});
 
         if (config.settings.removeExpiredIdTokens) {
-            await UserModel.findOneAndUpdate({email: email},
+            await UserModel.findOneAndUpdate({userId: userId},
                 {$pull: { idTokens: { expires: { $lt: (Date.now() / 1000)}}}});
         }
     }
 
-    public async saveRefreshTokenToUser(email: string, refreshToken: string, iat: number, exp: number,
+    public async saveRefreshTokenToUser(userId: string, refreshToken: string, iat: number, exp: number,
         clientId: string, scope: string[]) {
 
-        await UserModel.findOneAndUpdate({email: email},
+        await UserModel.findOneAndUpdate({userId: userId},
                 {$push: { refreshTokens: { token: refreshToken, created: iat, expires: exp, clientId: clientId,
-                    scope: scope, userId: email}}});
+                    scope: scope, userId: userId}}});
 
         if (config.settings.removeExpiredRefreshTokens) {
-            await UserModel.findOneAndUpdate({email: email},
+            await UserModel.findOneAndUpdate({userId: userId},
                 {$pull: { refreshTokens: { expires: { $lt: (Date.now() / 1000)}}}});
         }
     }
