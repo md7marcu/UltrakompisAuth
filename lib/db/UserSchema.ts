@@ -62,7 +62,7 @@ export const UserSchema: Schema = new Schema({
         scope: {
             type: [String],
         },
-        userId: {
+        email: {
             type: String,
         },
     }],

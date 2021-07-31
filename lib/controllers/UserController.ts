@@ -21,7 +21,6 @@ export class UserController {
         debug (`Login User: ${JSON.stringify(req.body)}`);
         try {
             let user = await database.getUserByEmail(req?.body?.email);
-
             let validPassword = undefined;
 
             if (req?.body?.password && user?.password)

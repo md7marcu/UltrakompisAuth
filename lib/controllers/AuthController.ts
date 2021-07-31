@@ -147,7 +147,7 @@ export class AuthController {
                     return;
                 }
                 let codeId = getRandomString(config.settings.authorizationCodeLength);
-                const request = { request: query, scope: selectedScope, userid: req.body.username };
+                const request = { request: query, scope: selectedScope, email: req.body.username };
 
                 database.saveAuthorizationCode(codeId, request);
 
@@ -264,7 +264,7 @@ export class AuthController {
                 }
 
                 if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
-                    let user = await app.Db.getUser(authorizationCodeRequest?.userid);
+                    let user = await app.Db.getUserByEmail(authorizationCodeRequest?.email);
                     let accessToken: string;
 
                     if (config.settings.opaqueAccessToken) {
@@ -293,7 +293,7 @@ export class AuthController {
 
                     if (config.settings.saveAccessToken) {
                         if (openIdConnectFlow) {
-                            app.Db.saveAccessTokenToUser(authorizationCodeRequest?.userid, accessToken);
+                            app.Db.saveAccessTokenToUser(authorizationCodeRequest?.email, accessToken);
                         } else {
                             app.Db.saveAccessToken(accessToken, clientId);
                         }
@@ -301,16 +301,16 @@ export class AuthController {
                     let refreshToken = getRandomString(config.settings.refreshTokenLength);
 
                     if (openIdConnectFlow) {
-                        app.Db.saveRefreshTokenToUser(authorizationCodeRequest.userid, refreshToken, clientId, authorizationCodeRequest.scope);
+                        app.Db.saveRefreshTokenToUser(authorizationCodeRequest.email, refreshToken, clientId, authorizationCodeRequest.scope);
                     } else {
-                        app.Db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scope, authorizationCodeRequest.userid);
+                        app.Db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scope, authorizationCodeRequest.email);
                     }
                     let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
 
                     if (openIdConnectFlow) {
-                        let idToken = await buildIdToken(authorizationCodeRequest?.userid,  clientId, user);
+                        let idToken = await buildIdToken(clientId, user);
                         resultPayload.id_token = signToken(idToken, app.httpsOptions.key);
-                        app.Db.saveIdTokenToUser(authorizationCodeRequest?.userid, resultPayload.id_token);
+                        app.Db.saveIdTokenToUser(authorizationCodeRequest?.email, resultPayload.id_token);
                     }
                     res.status(200).send(resultPayload);
 
@@ -340,7 +340,7 @@ export class AuthController {
 
                     return;
                 }
-                let user = await app.Db.getUser(refreshTokenData.userId);
+                let user = await app.Db.getUserByEmail(refreshTokenData.email);
                 let accessToken: string;
 
                 if (config.settings.opaqueAccessToken) {
@@ -351,8 +351,8 @@ export class AuthController {
                 }
 
                 if (config.settings.saveAccessToken) {
-                    if (refreshTokenData.userId) {
-                        app.Db.saveAccessTokenToUser(refreshTokenData.userId, accessToken);
+                    if (refreshTokenData.email) {
+                        app.Db.saveAccessTokenToUser(refreshTokenData.email, accessToken);
                     } else {
                         app.Db.saveAccessToken(accessToken, clientId);
                     }

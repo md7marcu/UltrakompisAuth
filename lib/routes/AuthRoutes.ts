@@ -38,11 +38,11 @@ export class AuthRoutes {
         let user;
 
         try {
-            user = await this.db.getUser(username);
+            user = await this.db.getUserByEmail(username);
         } catch (err) {
             next(err);
         }
-        let password = req?.body?.password ? req?.body?.password : "";
+        let password = req?.body?.password ?? "";
 
         if (!user || password === "" || !user.enabled) {
             req.body.authenticated = false;

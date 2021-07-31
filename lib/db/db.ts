@@ -4,7 +4,6 @@ import { config } from "node-config-ts";
 import IClient from "interfaces/IClient";
 import IUser from "interfaces/IUser";
 import ISettings from "interfaces/ISettings";
-import getRandomString from "../helpers/GetRandomString";
 import { hash } from "bcryptjs";
 import MongoDb from "./MongoDb";
 import { decode } from "jsonwebtoken";
@@ -136,27 +135,27 @@ export default class Db {
     }
 
     /* --------------------------------------------- USER --------------------------------------------- */
-    public async saveAccessTokenToUser(userId: string, accessToken: string) {
+    public async saveAccessTokenToUser(email: string, accessToken: string) {
         if (this.useMongo) {
             let decodedToken = (decode(accessToken) as any);
-            await new MongoDb().saveAccessTokenToUser(userId, accessToken, decodedToken);
+            await new MongoDb().saveAccessTokenToUser(email, accessToken, decodedToken);
         }
-        this.accessTokens.push({"accessToken": accessToken, "userId": userId});
+        this.accessTokens.push({"accessToken": accessToken, "email": email});
     }
 
     public saveAccessToken(accessToken: string, clientId: string) {
         this.accessTokens.push({"accessToken": accessToken, "clientId": clientId});
     }
 
-    public saveRefreshToken(refreshToken: string, clientId: string, scope: string[], userid: string) {
-        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
+    public saveRefreshToken(refreshToken: string, clientId: string, scope: string[], email: string) {
+        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "email": email});
     }
 
-    public async saveRefreshTokenToUser(userid: string, refreshToken: string, clientId: string, scope: string[]) {
+    public async saveRefreshTokenToUser(email: string, refreshToken: string, clientId: string, scope: string[]) {
         if (this.useMongo) {
-            await new MongoDb().saveRefreshTokenToUser(userid, refreshToken, Date.now() / 1000 - 200, this.maxDate.getTime(), clientId, scope);
+            await new MongoDb().saveRefreshTokenToUser(email, refreshToken, Date.now() / 1000 - 200, this.maxDate.getTime(), clientId, scope);
         } else {
-            this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
+            this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "email": email});
         }
     }
 
@@ -176,12 +175,12 @@ export default class Db {
         }
     }
 
-    public async saveIdTokenToUser(userid: string, idToken: string)  {
+    public async saveIdTokenToUser(email: string, idToken: string)  {
         if (this.useMongo) {
             let decodedToken = (decode(idToken) as any);
-            await new MongoDb().saveIdTokenToUser(userid, idToken, decodedToken);
+            await new MongoDb().saveIdTokenToUser(email, idToken, decodedToken);
         } else {
-            this.idTokens.push({idToken: idToken, userId: userid});
+            this.idTokens.push({idToken: idToken, email: email});
         }
     }
 
@@ -202,12 +201,12 @@ export default class Db {
     }
 
     public async addUser(name: string, email: string, password: string, claims: string[]): Promise<IUser> {
-        let hashedPassword = await hash(password, 8);
         let user: IUser;
 
         if (this.useMongo) {
-            user = await new MongoDb().addUser(name, email, hashedPassword, claims);
+            user = await new MongoDb().addUser(name, email, password, claims);
         } else {
+            let hashedPassword = await hash(password, 10);
             user = {
                 userId: Guid.create().toString(),
                 name: name,

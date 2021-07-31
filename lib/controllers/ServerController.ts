@@ -4,6 +4,8 @@ const debug = Debug("AuthServer:ServerController:");
 import Db from "../db/db";
 import { config } from "node-config-ts";
 import createJwk from "../helpers/Jwks";
+import { IUserRequest } from "../interfaces/IRequest";
+import IUser from "interfaces/IUser";
 
 export class ServerController {
 
@@ -27,6 +29,26 @@ export class ServerController {
         jwk.alg = config.settings.jwkAlgorithm;
 
         res.status(200).send({"keys": [jwk]});
+    }
+
+    public async userInfo(req: IUserRequest, res: Response, next: NextFunction, database: Db) {
+        debug(`Sending User Info`);
+        let user = await database.getUser(req.userId);
+
+        if (!user) {
+            res.status(401).send("Unknown user.");
+
+            return;
+        }
+        res.status(200).send(this.getUserInfo(user));
+    }
+
+    private getUserInfo(user: IUser): string {
+        return JSON.stringify({
+            "sub": user.userId,
+            "name": user.name,
+            "email": user.email,
+        });
     }
 }
 export const serverController = new ServerController();

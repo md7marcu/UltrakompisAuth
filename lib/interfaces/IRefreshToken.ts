@@ -4,5 +4,5 @@ export default interface IRefreshToken {
     expires: number;
     clientId: string;
     scope: string[];
-    userId: string;
+    email: string;
 }

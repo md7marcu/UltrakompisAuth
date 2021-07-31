@@ -8,7 +8,7 @@ export async function buildUserAccessToken(scope: string[], user: IUser): Promis
     let payload = {
         iss: config.settings.issuer,
         aud: config.settings.audience,
-        sub: Guid.create().toString(),
+        sub: user.userId,
         exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
         iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
         scope: scope,
