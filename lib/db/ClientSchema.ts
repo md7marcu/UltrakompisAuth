@@ -26,4 +26,18 @@ export const ClientSchema: Schema = new Schema({
         type: Boolean,
         required: false,
     },
+    accessTokens: [{
+        token: {
+            type: String,
+        },
+        created: {
+            type: Number,
+        },
+        expires: {
+            type: Number,
+        },
+    }],
+    refreshTokens: [{
+        type: String,
+    }],
 });

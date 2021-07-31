@@ -11,17 +11,6 @@ describe ("Static Db implementation", () => {
         config.settings.useMongo = false;
     });
 
-    it ("Should return undefined if the client doesn't exist", () => {
-        // tslint:disable-next-line:no-unused-expression
-        expect(new Db().getClient("-1")).to.be.empty;
-    });
-
-    it ("Should return the client", async () => {
-        let client = await new Db().getClient("ukauth-client");
-
-        assert.equal(client.scope[0], "ssn");
-    });
-
     it ("Should save a request", () => {
         let guid = Guid.create();
         let db = new Db();

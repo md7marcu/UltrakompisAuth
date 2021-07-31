@@ -1,4 +1,4 @@
-import { find, remove } from "lodash";
+import { findIndex, find, remove } from "lodash";
 import { Guid } from "guid-typescript";
 import { config } from "node-config-ts";
 import IClient from "interfaces/IClient";
@@ -45,11 +45,11 @@ export default class Db {
         // Only code value stored on the user record - not the rest of the request
         if (this.useMongo) {
             await new MongoDb().removeAuthorizationCodeFromUser(codeId);
+        } else {
+           remove(this.authorizationCodes, (code) => {
+                return code.codeId === codeId;
+            });
         }
-
-        remove(this.authorizationCodes, (code) => {
-            return code.codeId === codeId;
-        });
     }
 
     /* --------------------------------------------- REQUEST --------------------------------------------- */
@@ -108,11 +108,32 @@ export default class Db {
     }
 
     // TODO: Save to MongoDB - won't be able to refresh after a restart ..
-    public saveClientRefreshToken(refreshToken: string, clientId: string) {
-        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId});
+    public async saveClientRefreshToken(refreshToken: string, clientId: string) {
+        if (this.useMongo) {
+            await new MongoDb().saveClientRefreshToken(clientId, refreshToken);
+        } else {
+            let clientIndex = findIndex(this.clients, (element) => { return element.clientId === clientId; } );
+
+            if (clientIndex >= 0) {
+                this.clients[clientIndex].refreshTokens ? this.clients[clientIndex].refreshTokens.push(refreshToken) :
+                this.clients[clientIndex].refreshTokens = [refreshToken];
+            }
+        }
     }
 
-    // TODO: Save access token to the client in Mongo - see saveAccessTokenToUser and saveAccessToken below
+    public async saveClientAccessToken(accessToken: string, clientId: string) {
+        if (this.useMongo) {
+            let decodedToken = (decode(accessToken) as any);
+            await new MongoDb().saveClientAccessToken(clientId, accessToken, decodedToken);
+        } else {
+            let clientIndex = findIndex(this.clients, (element) => { return element.clientId === clientId; } );
+
+            if (clientIndex >= 0) {
+                this.clients[clientIndex].accessTokens ? this.clients[clientIndex].accessTokens.push(accessToken) :
+                this.clients[clientIndex].accessTokens = [accessToken];
+            }
+        }
+    }
 
     /* --------------------------------------------- USER --------------------------------------------- */
     public async saveAccessTokenToUser(userId: string, accessToken: string) {
@@ -134,8 +155,9 @@ export default class Db {
     public async saveRefreshTokenToUser(userid: string, refreshToken: string, clientId: string, scope: string[]) {
         if (this.useMongo) {
             await new MongoDb().saveRefreshTokenToUser(userid, refreshToken, Date.now() / 1000 - 200, this.maxDate.getTime(), clientId, scope);
+        } else {
+            this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
         }
-        this.refreshTokens.push({"refreshToken": refreshToken, "clientId": clientId, "scope": scope, "userid": userid});
     }
 
     public async validRefreshToken(refreshToken: string): Promise<boolean> {
@@ -158,8 +180,9 @@ export default class Db {
         if (this.useMongo) {
             let decodedToken = (decode(idToken) as any);
             await new MongoDb().saveIdTokenToUser(userid, idToken, decodedToken);
+        } else {
+            this.idTokens.push({idToken: idToken, userId: userid});
         }
-        this.idTokens.push({idToken: idToken, userId: userid});
     }
 
     public async updateUser(userId: string, sinceEpoch: number, code: string) {

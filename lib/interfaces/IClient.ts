@@ -1,3 +1,5 @@
+import IAccessToken from "./IAccessToken";
+
 export default interface IClient {
     clientId: string;
     clientSecret?: string;
@@ -5,4 +7,6 @@ export default interface IClient {
     scope: string[];
     public?: boolean;
     enabled: boolean;
+    accessTokens?: IAccessToken[];
+    refreshTokens?: string[];
 }

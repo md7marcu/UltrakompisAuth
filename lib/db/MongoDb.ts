@@ -48,8 +48,6 @@ export default class MongoDb {
     }
 
     public async saveAccessTokenToUser(userId: string, accessToken: string, decodedToken: any) {
-        let token: IAccessToken = {token: accessToken, created: decodedToken?.iat, expires: decodedToken?.exp};
-
         await UserModel.findOneAndUpdate({userId: userId},
                 {$push: { accessTokens: { token: accessToken, created: decodedToken.iat, expires: decodedToken.exp}}});
 
@@ -60,8 +58,6 @@ export default class MongoDb {
     }
 
     public async saveIdTokenToUser(userId: string, idToken: string, decodedToken: any) {
-        let token: IIdToken = {token: idToken, created: decodedToken?.iat, expires: decodedToken?.exp};
-
         await UserModel.findOneAndUpdate({userId: userId},
                 {$push: { idTokens: { token: idToken, created: decodedToken.iat, expires: decodedToken.exp}}});
 
@@ -136,5 +132,25 @@ export default class MongoDb {
     }
     public async getClient(clientId: string): Promise<IClient> {
         return await ClientModel.findOne({clientId: clientId, enabled: true}).lean();
+    }
+
+    public async validateClientRefreshToken(refreshToken: string): Promise<boolean> {
+        let user = await ClientModel.findOne({ refreshTokens: refreshToken}).lean();
+
+        return user !== null;
+    }
+
+    public async saveClientAccessToken(clientId: string, accessToken: string, decodedToken: any) {
+        await ClientModel.findOneAndUpdate({clientId: clientId},
+                {$push: { accessTokens: { token: accessToken, created: decodedToken.iat, expires: decodedToken.exp}}});
+
+        if (config.settings.removeExpiredAccessTokens) {
+            await ClientModel.findOneAndUpdate({clientId: clientId},
+                {$pull: { accessTokens: { expires: { $lt: (Date.now() / 1000)}}}});
+        }
+    }
+
+    public async saveClientRefreshToken(clientId: string, refreshToken: string) {
+        await ClientModel.findOneAndUpdate({clientId: clientId}, {$push: { refreshToken: refreshToken}});
     }
 }

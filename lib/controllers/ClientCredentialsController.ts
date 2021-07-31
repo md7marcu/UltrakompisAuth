@@ -30,11 +30,11 @@ export class ClientCredentialsController {
             db.saveClientRefreshToken(refreshToken, clientAuth.user);
 
             return {
-                    access_token: accessToken,
-                    token_type: config.settings.bearerTokenType,
-                    expires_in: config.settings.expiryTime,
-                    refresh_token: refreshToken,
-                    scope: client.scope,
+                access_token: accessToken,
+                token_type: config.settings.bearerTokenType,
+                expires_in: config.settings.expiryTime,
+                refresh_token: refreshToken,
+                scope: client.scope,
             };
         }
         return undefined;
