@@ -46,9 +46,15 @@ export default class MongoDb {
         return await UserModel.findOne({email: email, enabled: true}).lean();
     }
 
+    public async getUserByAccessToken(token: string): Promise<IUser> {
+        let user = await UserModel.findOne({ accessTokens: {$elemMatch: {token: token}}}).lean();
+
+        return user;
+    }
+
     public async saveAccessTokenToUser(email: string, accessToken: string, decodedToken: any) {
         await UserModel.findOneAndUpdate({email: email},
-                {$push: { accessTokens: { token: accessToken, created: decodedToken.iat, expires: decodedToken.exp}}});
+                {$push: { accessTokens: { token: accessToken, created: decodedToken?.iat, expires: decodedToken?.exp}}});
 
         if (config.settings.removeExpiredAccessTokens) {
             await UserModel.findOneAndUpdate({email: email},

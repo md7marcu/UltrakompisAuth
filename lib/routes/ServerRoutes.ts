@@ -6,6 +6,7 @@ import { asyncHandler } from "../middleware/AsyncHandler";
 import verifyToken from "../helpers/VerifyToken";
 import { decode } from "jsonwebtoken";
 import { IUserRequest } from "../interfaces/IRequest";
+import { config } from "node-config-ts";
 
 export class ServerRoutes {
     public routes(app: IApplication): void {
@@ -40,15 +41,37 @@ export class ServerRoutes {
         }));
     }
 
-    private verifyUser = (app) => {
+    private verifyUser = (app: IApplication) => {
         return async(req: IUserRequest, res: Response, next: NextFunction): Promise<any> => {
-            try {
-                if (verifyToken(req?.headers?.authorization, app?.httpsOptions?.cert)) {
-                    let decodedToken = decode(req.headers.authorization);
-                    req.userId = decodedToken.sub;
+
+           if (config.settings.opaqueAccessToken) {
+               try {
+                   let user = await app.Db.getUserByAccessToken(req?.headers?.authorization);
+
+                    if (user) {
+                        req.userId = user.userId;
+                        next();
+
+                        return;
+                    }
+                    throw new Error("Invalid access token.");
+                } catch (error) {
+                    next(error);
                 }
-            } catch (error) {
-                next(error);
+                next();
+
+                return;
+           } else {
+                try {
+                    if (verifyToken(req?.headers?.authorization, app?.httpsOptions?.cert)) {
+                        let decodedToken = decode(req.headers.authorization);
+                        req.userId = decodedToken.sub;
+                    }
+                } catch (error) {
+                    next(error);
+
+                    return;
+                }
             }
             next();
         };

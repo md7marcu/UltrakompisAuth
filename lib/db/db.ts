@@ -137,7 +137,7 @@ export default class Db {
     /* --------------------------------------------- USER --------------------------------------------- */
     public async saveAccessTokenToUser(email: string, accessToken: string) {
         if (this.useMongo) {
-            let decodedToken = (decode(accessToken) as any);
+            let decodedToken = config.settings.opaqueAccessToken ? undefined : (decode(accessToken) as any);
             await new MongoDb().saveAccessTokenToUser(email, accessToken, decodedToken);
         }
         this.accessTokens.push({"accessToken": accessToken, "email": email});
@@ -234,6 +234,14 @@ export default class Db {
             return await new MongoDb().getUserByEmail(email);
         } else {
             return find(this.users, (u) => u.email === email);
+        }
+    }
+    // TODO: Missing test
+    public async getUserByAccessToken(token: string): Promise<IUser> {
+        if (this.useMongo) {
+            return await new MongoDb().getUserByAccessToken(token);
+        } else {
+            return find(this.users, (u: IUser) => find(u.accessTokens, (t: string) => t === token));
         }
     }
     /* --------------------------------------------- SETTINGS --------------------------------------------- */
