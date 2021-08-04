@@ -46,6 +46,7 @@ export default class MongoDb {
         return await UserModel.findOne({email: email, enabled: true}).lean();
     }
 
+    // TODO: Missing test
     public async getUserByAccessToken(token: string): Promise<IUser> {
         let user = await UserModel.findOne({ accessTokens: {$elemMatch: {token: token}}}).lean();
 

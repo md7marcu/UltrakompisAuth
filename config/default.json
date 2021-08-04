@@ -23,7 +23,7 @@
         "removeExpiredRefreshTokens": true,
         "removeExpiredIdTokens": true,
         "refreshTokenLength": 64,
-        "corsWhitelist": ["http://localhost:4200", "http://192.168.86.127:4200", "https://localhost:3000", "https://localhost:3002", "https://192.168.86.127:3002", "https://localhost:4002"],
+        "corsWhitelist": [],
         "expiryTime": 3600,
         "tokenExchangeExpiryTime": 60,
         "createdTimeAgo": 30,

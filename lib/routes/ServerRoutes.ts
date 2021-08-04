@@ -43,7 +43,7 @@ export class ServerRoutes {
 
     private verifyUser = (app: IApplication) => {
         return async(req: IUserRequest, res: Response, next: NextFunction): Promise<any> => {
-
+        // TODO: Missing testS
            if (config.settings.opaqueAccessToken) {
                try {
                    let user = await app.Db.getUserByAccessToken(req?.headers?.authorization);
