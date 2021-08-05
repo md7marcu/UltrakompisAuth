@@ -2,8 +2,7 @@ import "mocha";
 import * as Supertest from "supertest";
 import app  from "../lib/app";
 import { VerifyOptions, decode } from "jsonwebtoken";
-import * as fs from "fs";
-import * as Debug from "debug";
+import setHttpsOptions from "./helpers/certs";
 import { expect } from "chai";
 import { config } from "node-config-ts";
 import * as path from "path";
@@ -48,8 +47,7 @@ describe("Auth routes", () => {
         await new ClientModel(ukAuthClient).save();
         await new ClientModel(authClient).save();
         await UserModel.findOneAndUpdate({email: user.email}, user, {new: true, upsert: true});
-        setHttpOptions(app);
-        //  Debug.disable();
+        setHttpsOptions(app);
     });
 
     beforeEach(() => {
@@ -294,10 +292,3 @@ describe("Auth routes", () => {
         expect((Date.now() / 1000 - token.exp) < 100).to.be.true;
     });
 });
-
-const setHttpOptions = (lapp) => {
-    lapp.httpsOptions = {
-        key: fs.readFileSync("./config/key.pem"),
-        cert: fs.readFileSync("./config/cert.pem"),
-    };
-};

@@ -6,12 +6,10 @@ import * as Debug from "debug";
 import { config } from "node-config-ts";
 import setHttpsOptions from "./helpers/certs";
 import { buildAndSignToken } from "./helpers/token";
-import { prototype } from "mocha";
 
 describe("Server routes", () => {
     let wellKnownSettings;
-    // let serverKid = "PInJ1JPDMcH4oXyI-1LJJpP6R3ezXdExCBHlVaIwjDc";
-    let serverKid = "PCJRsp7ReGptQgyN6D_9OsqMZ9akBfKbrOW23iAaXtM";
+    let serverKid = "localhost";
     let user = {
         userId: "12345678",
         email: "user@email.com",

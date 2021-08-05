@@ -24,7 +24,7 @@ export interface IApplication extends express.Application {
 export class App {
     public app: IApplication;
     public Db: Db;
-    public httpsOptions: any;
+    public httpsOptions: IHttpsOptions;
     private authRoutes: AuthRoutes = new AuthRoutes();
     private userRoutes: UserRoutes = new UserRoutes();
     private viewRoutes: ViewRoutes = new ViewRoutes();
