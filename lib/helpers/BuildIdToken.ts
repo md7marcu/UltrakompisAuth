@@ -8,11 +8,12 @@ export default async function buildIdToken(clientId: string, user: IUser): Promi
     return {
         iss: config.settings.issuer,
         sub: user.userId,
-        aud: clientId,
+        aud: [config.settings.audience, clientId],
         exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
         iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
         auth_time: user?.lastAuthenticated,
         email: user?.email,
         nonce: user?.nonce,
+        claims: user.claims,
     };
 }

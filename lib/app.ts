@@ -35,6 +35,7 @@ export class App {
 
     constructor() {
         (this.app as any) = express();
+        debug.log = console.log.bind(console);
         // Create the "database"
         this.app.Db = new Db();
         this.localConfig();
@@ -45,7 +46,6 @@ export class App {
         this.serverRoutes.routes(this.app);
         this.clientRoutes.routes(this.app);
         this.app.use(errorHandler);
-        debug.log = console.log.bind(console);
 
         if (config.settings.useMongo) {
             debug("Using MongoDb.");
@@ -91,6 +91,11 @@ export class App {
             }
           },
         };
+        // Need to allow credentials through CORS
+        this.app.use(function(req, res, next) {
+            res.set("Access-Control-Allow-Credentials", "true");
+            next();
+        });
         this.app.use(cors(corsOptions));
     }
 

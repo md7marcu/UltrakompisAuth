@@ -16,7 +16,7 @@ export class ServerController {
         wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
         wellKnownBase.token_endpoint = config.settings.accessTokenEndpoint;
         wellKnownBase.jwks_uri = config.settings.jwksEndpoint;
-        wellKnownBase.userinfo_endpoint = "";
+        wellKnownBase.userinfo_endpoint = config.settings.userinfoEndpoint;
         wellKnownBase.revocation_endpoint = "";
 
         res.status(200).send(wellKnownBase);
@@ -43,12 +43,12 @@ export class ServerController {
         res.status(200).send(this.getUserInfo(user));
     }
 
-    private getUserInfo(user: IUser): string {
-        return JSON.stringify({
+    private getUserInfo(user: IUser): any {
+        return {
             "sub": user.userId,
             "name": user.name,
             "email": user.email,
-        });
+        };
     }
 }
 export const serverController = new ServerController();

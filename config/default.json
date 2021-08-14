@@ -8,6 +8,7 @@
         "accessTokenEndpoint": "https://localhost:3002/token",
         "aliveEndpoint": "https://localhost:3002/alive",
         "jwksEndpoint": "https://localhost:3002/oauth2/certs",
+        "userinfoEndpoint": "https://localhost:3002/userinfo",
         "scope": "ssn",
         "verifyRedirectUrl": true,
         "verifyClientId": true,
@@ -53,6 +54,14 @@
                 "scope": ["weight", "openid"]
             },
             {
+                "clientId": "smurflandiaweb",
+                "public": true,
+                "redirectUris": [
+                    "http://localhost:4200/authenticated"
+                ],
+                "scope": ["openid"]
+            },
+            {
                 "clientId": "public-client",
                 "public": true,
                 "redirectUris": [
@@ -77,9 +86,9 @@
                 "name": "Email Juarez"
             }
         ],
-    "serverCert": "/config/tests/dev_authserver_cert.pem",
-    "appKey": "/config/tests/dev_authserver.key",
-    "appCert": "/config/tests/dev_authserver_cert.pem",
+    "serverCert": "./config/tests/dev_authserver_cert.pem",
+    "appKey": "./config/tests/dev_authserver.key",
+    "appCert": "./config/tests/dev_authserver_cert.pem",
     "jwkAlgorithm": "RS256",
     "jwkUse": "sig",
     "opaqueAccessToken": false

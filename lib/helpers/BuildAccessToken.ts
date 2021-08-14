@@ -4,10 +4,10 @@ import IUser from "../interfaces/IUser";
 import getRandomString from "./GetRandomString";
 import { Guid } from "guid-typescript";
 
-export async function buildUserAccessToken(scope: string[], user: IUser): Promise<IVerifyOptions> {
+export async function buildUserAccessToken(scope: string[], clientId: string, user: IUser): Promise<IVerifyOptions> {
     let payload = {
         iss: config.settings.issuer,
-        aud: config.settings.audience,
+        aud: [config.settings.audience, clientId],
         sub: user.userId,
         exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
         iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,
@@ -25,7 +25,7 @@ export async function buildUserAccessToken(scope: string[], user: IUser): Promis
 export async function buildClientAccessToken(clientId: string, scope: string[]): Promise<IVerifyOptions> {
     let payload = {
         iss: config.settings.issuer,
-        aud: config.settings.audience,
+        aud: [config.settings.audience, clientId],
         sub: clientId,
         exp: Math.floor(Date.now() / 1000) + config.settings.expiryTime,
         iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,

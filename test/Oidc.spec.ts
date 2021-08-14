@@ -9,7 +9,7 @@ import * as path from "path";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
-    aud: string;
+    aud: string[];
 }
 describe("OIDC authorization code flow", () => {
     let db = (app as any).Db;

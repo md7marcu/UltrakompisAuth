@@ -8,7 +8,7 @@ import ClientModel from "../lib/db/ClientModel";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
-    aud: string;
+    aud: string[];
 }
 describe("Client routes", () => {
     const testClientId: string = "TestClientId";

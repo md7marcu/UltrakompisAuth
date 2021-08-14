@@ -24,8 +24,8 @@ describe("Server routes", () => {
         wellKnownSettings.issuer = config.settings.issuer;
         wellKnownSettings.authorization_endpoint = config.settings.authorizationEndpoint;
         wellKnownSettings.token_endpoint = config.settings.accessTokenEndpoint;
+        wellKnownSettings.userinfo_endpoint = config.settings.userinfoEndpoint;
         wellKnownSettings.jwks_uri = config.settings.jwksEndpoint;
-        wellKnownSettings.userinfo_endpoint = "";
         wellKnownSettings.revocation_endpoint = "";
         setHttpsOptions(app);
     });

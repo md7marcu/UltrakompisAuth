@@ -12,7 +12,7 @@ import UserModel from "../lib/db/UserModel";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
-    aud: string;
+    aud: string[];
 }
 
 describe("Auth routes", () => {

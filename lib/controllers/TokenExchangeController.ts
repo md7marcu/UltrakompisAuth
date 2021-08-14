@@ -37,12 +37,15 @@ export class TokenExchangeController {
             }
             let subjectToken = body.subject_token;
 
-            if (!verifyToken(subjectToken, cert)) {
+            // TODO: Support opaque token
+            let decodedSubjectToken = verifyToken(subjectToken, cert);
+
+            if (!decodedSubjectToken) {
                 debug(`Failed to verify subject_token ${subjectToken}`);
 
                 return undefined; // 400
             }
-            let decodedSubjectToken = (decode(subjectToken) as any);
+
             // If the token has a may act - the may act field need to match the actor (client id)
             if (decodedSubjectToken.may_act && !this.verifyMayAct(decodedSubjectToken.may_act.sub, client.clientId)) {
                 return undefined; // 401
@@ -69,7 +72,7 @@ export class TokenExchangeController {
     private buildTokenExchangeToken = (subject: string, clientId: string, scope: string[]): IVerifyOptions => {
         let payload = {
             iss: config.settings.issuer,
-            aud: config.settings.audience, // config.settings.microserviceAudience
+            aud: [config.settings.audience, clientId],
             sub: subject,
             exp: Math.floor(Date.now() / 1000) + config.settings.tokenExchangeExpiryTime,
             iat: Math.floor(Date.now() / 1000) - config.settings.createdTimeAgo,

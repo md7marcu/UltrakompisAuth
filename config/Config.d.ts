@@ -28,6 +28,7 @@ declare module "node-config-ts" {
     accessTokenEndpoint: string
     aliveEndpoint: string
     jwksEndpoint: string
+    userinfoEndpoint: string
     scope: string
     verifyRedirectUrl: boolean
     verifyClientId: boolean
@@ -43,7 +44,7 @@ declare module "node-config-ts" {
     removeExpiredRefreshTokens: boolean
     removeExpiredIdTokens: boolean
     refreshTokenLength: number
-    corsWhitelist: string[]
+    corsWhitelist: any[]
     expiryTime: number
     tokenExchangeExpiryTime: number
     createdTimeAgo: number
@@ -62,6 +63,8 @@ declare module "node-config-ts" {
     clients: Client[]
     users: User[]
     serverCert: string
+    appKey: string
+    appCert: string
     jwkAlgorithm: string
     jwkUse: string
     opaqueAccessToken: boolean

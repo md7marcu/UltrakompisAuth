@@ -63,8 +63,9 @@ export class ServerRoutes {
                 return;
            } else {
                 try {
-                    if (verifyToken(req?.headers?.authorization, app?.httpsOptions?.cert)) {
-                        let decodedToken = decode(req.headers.authorization);
+                    let decodedToken = verifyToken(req?.headers?.authorization, app?.httpsOptions?.cert);
+
+                    if (decodedToken) {
                         req.userId = decodedToken.sub;
                     }
                 } catch (error) {

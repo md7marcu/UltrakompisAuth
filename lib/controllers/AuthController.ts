@@ -270,7 +270,7 @@ export class AuthController {
                     if (config.settings.opaqueAccessToken) {
                         accessToken = Guid.create().toString();
                     } else {
-                        let payload = await buildUserAccessToken(authorizationCodeRequest.scope, user);
+                        let payload = await buildUserAccessToken(authorizationCodeRequest.scope, clientId, user);
                         accessToken = signToken(payload, app.httpsOptions.key);
                     }
                     let scope = this.getScopeFromRequest(authorizationCodeRequest.request);
@@ -346,7 +346,7 @@ export class AuthController {
                 if (config.settings.opaqueAccessToken) {
                     accessToken = Guid.create().toString();
                 } else {
-                    let payload = await buildUserAccessToken(refreshTokenData.scope, user);
+                    let payload = await buildUserAccessToken(refreshTokenData.scope, clientId, user);
                     accessToken = signToken(payload, app.httpsOptions.key);
                 }
 

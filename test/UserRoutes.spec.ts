@@ -9,7 +9,7 @@ import * as Debug from "debug";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
-    aud: string;
+    aud: string[];
 }
 describe("User routes", () => {
     const testName: string = "TestName";
