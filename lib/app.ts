@@ -15,6 +15,8 @@ import { logger } from "./middleware/middleware";
 import IHttpsOptions from "./interfaces/IHttpsOptions";
 import { errorHandler } from "./middleware/Error";
 import { MongoMemoryServer } from "mongodb-memory-server";
+import * as favicon from "serve-favicon";
+import path = require("path");
 
 export interface IApplication extends express.Application {
     Db: Db;
@@ -46,6 +48,10 @@ export class App {
         this.serverRoutes.routes(this.app);
         this.clientRoutes.routes(this.app);
         this.app.use(errorHandler);
+
+        if (!this.isDev) {
+            this.app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
+        }
 
         if (config.settings.useMongo) {
             debug("Using MongoDb.");

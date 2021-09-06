@@ -9,4 +9,6 @@ export interface IVerifyOptions extends VerifyOptions {
     iat: number;
     email?: string;
     claims?: string[];
+    scope?: string[];
+    azp?: string;
 }

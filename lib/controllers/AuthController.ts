@@ -17,6 +17,7 @@ import verifyCodeChallenge from "../helpers/VerifyCodeChallenge";
 import { buildUserAccessToken } from "../helpers/BuildAccessToken";
 import buildIdToken from "../helpers/BuildIdToken";
 import { ErrorResponse } from "../helpers/ErrorResponse";
+import IUser from "interfaces/IUser";
 
 export class AuthController {
 
@@ -206,7 +207,7 @@ export class AuthController {
                                                                 req?.body, app.httpsOptions.key, app.httpsOptions.cert);
 
             if (token === undefined) {
-                next(new ErrorResponse("Unknown error for token exchange.", 400));
+                next(new ErrorResponse("Unknown error for token exchange.", 401));
             } else {
                 res.status(200).send(token);
             }
@@ -308,9 +309,15 @@ export class AuthController {
                     let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
 
                     if (openIdConnectFlow) {
-                        let idToken = await buildIdToken(clientId, user);
-                        resultPayload.id_token = signToken(idToken, app.httpsOptions.key);
-                        app.Db.saveIdTokenToUser(authorizationCodeRequest?.email, resultPayload.id_token);
+                        await this.createIdToken(clientId, user, app, authorizationCodeRequest?.email);
+                    }
+
+                    // TODO: Handle opaque tokens properly
+                    // If we're doing opaque access token - do not return refresh and id token
+                    if (config.settings.opaqueAccessToken) {
+                        // resultPayload.id_token = undefined; have to return id_token
+                        // oidc-client - refresh_token silent renew
+                        // resultPayload.refresh_token = undefined;
                     }
                     res.status(200).send(resultPayload);
 
@@ -357,7 +364,8 @@ export class AuthController {
                         app.Db.saveAccessToken(accessToken, clientId);
                     }
                 }
-                res.status(200).send({access_token: accessToken, refresh_token: refreshTokenData.token });
+                let idToken = await this.createIdToken(clientId, user, app, refreshTokenData?.email);
+                res.status(200).send({access_token: accessToken, refresh_token: refreshTokenData.token, id_token: idToken });
             } else {
                 debug("Called with invalid refresh token.");
                 next(new ErrorResponse("Called with invalid refresh token.", 400));
@@ -389,6 +397,24 @@ export class AuthController {
 
     private getScopeFromRequest = (request: any) => {
         return request.scope ?? request.scopes;
+    }
+
+    private async createIdToken(clientId: string, user: IUser, app: IApplication, email: string): Promise<string> {
+        let idToken = await buildIdToken(clientId, user);
+        // tslint:disable-next-line:variable-name
+        let id_token: string;
+
+        // TODO: Handle opaque tokens 'properly'
+        // Remove claims from id token
+        if (config.settings.opaqueAccessToken) {
+            idToken.claims = undefined;
+            id_token = signToken(idToken, app.httpsOptions.key);
+        } else {
+            id_token = signToken(idToken, app.httpsOptions.key);
+        }
+        app.Db.saveIdTokenToUser(email, id_token);
+
+        return id_token;
     }
 
     // Verify that the client has all scope that's asked for

@@ -11,7 +11,7 @@ export default function verifyClient(client: IClient, clientId: string, clientSe
     if (client.clientSecret !== clientSecret) {
         debug("Invalid client secret: <removed>");
 
-        return false;    
+        return false;
     }
     return true;
 }

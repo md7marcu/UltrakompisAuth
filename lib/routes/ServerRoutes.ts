@@ -46,7 +46,7 @@ export class ServerRoutes {
         // TODO: Missing testS
            if (config.settings.opaqueAccessToken) {
                try {
-                   let user = await app.Db.getUserByAccessToken(req?.headers?.authorization);
+                   let user = await app.Db.getUserByAccessToken(req?.headers?.authorization?.replace("Bearer ", ""));
 
                     if (user) {
                         req.userId = user.userId;

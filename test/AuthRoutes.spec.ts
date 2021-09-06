@@ -291,4 +291,29 @@ describe("Auth routes", () => {
         // tslint:disable-next-line:no-unused-expression
         expect((Date.now() / 1000 - token.exp) < 100).to.be.true;
     });
+
+    it("Id token Should contain the azp claim", async () => {
+        let code = "abc123";
+        let clientId = config.settings.clients[0].clientId;
+        let refreshToken = "cba321-28";
+        await db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], email: user.email});
+        await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
+
+        const response = await Supertest(app)
+        .post("/token")
+        .type("form")
+        .send(
+            {
+                client_id: clientId,
+                client_secret: config.settings.clients[0].clientSecret,
+                grant_type: config.settings.refreshTokenGrant,
+                refresh_token: refreshToken,
+            });
+
+        expect(response.status).to.be.equal(200);
+
+        let token = decode(JSON.parse(response.text).id_token) as any;
+
+        expect(token.azp).to.be.equal(clientId);
+    });
 });

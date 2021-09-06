@@ -15,5 +15,6 @@ export default async function buildIdToken(clientId: string, user: IUser): Promi
         email: user?.email,
         nonce: user?.nonce,
         claims: user.claims,
+        azp: clientId,
     };
 }

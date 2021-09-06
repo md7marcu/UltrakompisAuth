@@ -9,7 +9,7 @@ import IBasicAuth from "../interfaces/IBasicAuth";
 import verifyClient from "../helpers/VerifyClient";
 import getBasicAuth from "../helpers/GetBasicAuth";
 import verifyToken from "../helpers/VerifyToken";
-import { decode } from "jsonwebtoken";
+import { union } from "lodash";
 const debug = Debug("AuthServer:TokenExchangeController:");
 
 export class TokenExchangeController {
@@ -38,20 +38,23 @@ export class TokenExchangeController {
             let subjectToken = body.subject_token;
 
             // TODO: Support opaque token
+            // TODO: catch thrown exception
             let decodedSubjectToken = verifyToken(subjectToken, cert);
 
             if (!decodedSubjectToken) {
                 debug(`Failed to verify subject_token ${subjectToken}`);
 
-                return undefined; // 400
+                return undefined; // 400 or 401 (expired)
             }
+
+            let user = await db.getUser(decodedSubjectToken.sub);
 
             // If the token has a may act - the may act field need to match the actor (client id)
             if (decodedSubjectToken.may_act && !this.verifyMayAct(decodedSubjectToken.may_act.sub, client.clientId)) {
                 return undefined; // 401
             }
 
-            let tokenPayload = this.buildTokenExchangeToken(decodedSubjectToken.sub, client.clientId, decodedSubjectToken.scope);
+            let tokenPayload = this.buildTokenExchangeToken(decodedSubjectToken.sub, client.clientId, union(user.claims, body?.scope ?? []));
             let accessToken = signToken(tokenPayload, key);
 
             return {
@@ -59,7 +62,7 @@ export class TokenExchangeController {
                 issued_token_type: config.settings.tokenExchangeSubjectType,
                 token_type: config.settings.bearerTokenType,
                 expires_in: config.settings.tokenExchangeExpiryTime,
-                scope: decodedSubjectToken.scope,
+                scope: tokenPayload.scope,
             };
         }
         return undefined; // 401
