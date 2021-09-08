@@ -8,7 +8,8 @@ import setHttpsOptions from "./helpers/certs";
 import { buildAndSignToken } from "./helpers/token";
 
 describe("Server routes", () => {
-    let wellKnownSettings;
+    let wellKnownOpenIdSettings;
+    let wellKnownServerSettings;
     let serverKid = "localhost";
     let user = {
         userId: "12345678",
@@ -20,20 +21,40 @@ describe("Server routes", () => {
 
     beforeEach( async() => {
         Debug.disable();
-        wellKnownSettings = config.wellKnown;
-        wellKnownSettings.issuer = config.settings.issuer;
-        wellKnownSettings.authorization_endpoint = config.settings.authorizationEndpoint;
-        wellKnownSettings.token_endpoint = config.settings.accessTokenEndpoint;
-        wellKnownSettings.userinfo_endpoint = config.settings.userinfoEndpoint;
-        wellKnownSettings.jwks_uri = config.settings.jwksEndpoint;
-        wellKnownSettings.revocation_endpoint = "";
+        wellKnownOpenIdSettings = config.wellKnown;
+        wellKnownOpenIdSettings.issuer = config.settings.issuer;
+        wellKnownOpenIdSettings.authorization_endpoint = config.settings.authorizationEndpoint;
+        wellKnownOpenIdSettings.token_endpoint = config.settings.accessTokenEndpoint;
+        wellKnownOpenIdSettings.userinfo_endpoint = config.settings.userinfoEndpoint;
+        wellKnownOpenIdSettings.jwks_uri = config.settings.jwksEndpoint;
+        wellKnownOpenIdSettings.revocation_endpoint = "";
+
+        wellKnownServerSettings = config.wellKnown;
+        wellKnownServerSettings.issuer = config.settings.issuer;
+        wellKnownServerSettings.authorization_endpoint = config.settings.authorizationEndpoint;
+        wellKnownServerSettings.token_endpoint = config.settings.accessTokenEndpoint;
+        wellKnownServerSettings.scopes_supported = config.settings.scopes_supported;
+        wellKnownServerSettings.response_types_supported = config.settings.response_types_supported;
+        wellKnownServerSettings.jwks_uri = config.settings.jwksEndpoint;
+        wellKnownServerSettings.userinfo_endpoint = config.settings.userinfoEndpoint;
+        wellKnownServerSettings.revocation_endpoint = "";
+        wellKnownServerSettings.token_endpoint_auth_signing_alg_values_supported = config.settings.token_endpoint_auth_signing_alg_values_supported;
+        wellKnownServerSettings.grant_types_supported = config.settings.grant_types_supported;
+
         setHttpsOptions(app);
     });
 
     it("Should return 200 when retrieving well-known", async () => {
-        let testWellKnown = JSON.stringify(wellKnownSettings);
+        let testWellKnown = JSON.stringify(wellKnownOpenIdSettings);
         const response = await Supertest(app)
             .get("/.well-known/openid-configuration");
+        expect(JSON.stringify(JSON.parse(response.text))).to.be.equal(testWellKnown);
+    });
+
+    it("Should return 200 when retrieving well-known server", async () => {
+        let testWellKnown = JSON.stringify(wellKnownOpenIdSettings);
+        const response = await Supertest(app)
+            .get("/.well-known/oauth-authorization-server");
         expect(JSON.stringify(JSON.parse(response.text))).to.be.equal(testWellKnown);
     });
 

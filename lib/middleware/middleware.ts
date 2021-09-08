@@ -5,6 +5,7 @@ const debug = Debug("AuthServer:AuthRoutes:");
 
 export const logger = async(req: IRequest, res: Response, next: NextFunction): Promise<any> => {
     debug(`${req.method} ${req.protocol}://${req.get("host")}${req.originalUrl}`);
+
     next();
 };
 

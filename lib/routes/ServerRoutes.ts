@@ -13,7 +13,11 @@ export class ServerRoutes {
         let db: Db = app.Db;
 
         app.get("/.well-known/openid-configuration", asyncHandler((req: Request, res: Response, next: NextFunction) => {
-            serverController.wellKnown(req, res, next, db);
+            serverController.wellKnownOpenIdConfiguration(req, res, next, db);
+        }));
+
+        app.get("/.well-known/oauth-authorization-server", asyncHandler((req: Request, res: Response, next: NextFunction) => {
+            serverController.wellKnownServer(req, res, next, db);
         }));
 
         app.get("/oauth2/certs", asyncHandler((req: Request, res: Response, next: NextFunction) => {

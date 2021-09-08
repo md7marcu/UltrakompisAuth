@@ -309,7 +309,8 @@ export class AuthController {
                     let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
 
                     if (openIdConnectFlow) {
-                        await this.createIdToken(clientId, user, app, authorizationCodeRequest?.email);
+                        let idToken = await this.createIdToken(clientId, user, app, authorizationCodeRequest?.email);
+                        resultPayload.id_token = idToken;
                     }
 
                     // TODO: Handle opaque tokens properly

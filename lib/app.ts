@@ -89,8 +89,8 @@ export class App {
         const whitelist = config.settings.corsWhitelist;
         const corsOptions = {
           origin: function (origin, callback) {
-            // origin is undefined server - server
-            if (whitelist.indexOf(origin) !== -1 || !origin) {
+            // origin is undefined (or "null") when server to server
+            if (origin === "null" || whitelist.indexOf(origin) !== -1 || !origin) {
               callback(undefined, true);
             } else {
               callback(new Error("Cors error."));

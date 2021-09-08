@@ -9,8 +9,8 @@ import IUser from "interfaces/IUser";
 
 export class ServerController {
 
-    public async wellKnown(req: Request, res: Response, next: NextFunction, database: Db) {
-        debug(`Sending well-known`);
+    public async wellKnownOpenIdConfiguration(req: Request, res: Response, next: NextFunction, database: Db) {
+        debug(`Sending well-known openid configuration`);
         let wellKnownBase = config.wellKnown;
         wellKnownBase.issuer = config.settings.issuer;
         wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
@@ -18,6 +18,23 @@ export class ServerController {
         wellKnownBase.jwks_uri = config.settings.jwksEndpoint;
         wellKnownBase.userinfo_endpoint = config.settings.userinfoEndpoint;
         wellKnownBase.revocation_endpoint = "";
+
+        res.status(200).send(wellKnownBase);
+    }
+
+    public async wellKnownServer(req: Request, res: Response, next: NextFunction, database: Db) {
+        debug(`Sending well-known server`);
+        let wellKnownBase = config.wellKnown;
+        wellKnownBase.issuer = config.settings.issuer;
+        wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
+        wellKnownBase.token_endpoint = config.settings.accessTokenEndpoint;
+        wellKnownBase.scopes_supported = config.settings.scopes_supported;
+        wellKnownBase.response_types_supported = config.settings.response_types_supported;
+        wellKnownBase.jwks_uri = config.settings.jwksEndpoint;
+        wellKnownBase.userinfo_endpoint = config.settings.userinfoEndpoint;
+        wellKnownBase.revocation_endpoint = "";
+        wellKnownBase.token_endpoint_auth_signing_alg_values_supported = config.settings.token_endpoint_auth_signing_alg_values_supported;
+        wellKnownBase.grant_types_supported = config.settings.grant_types_supported;
 
         res.status(200).send(wellKnownBase);
     }
