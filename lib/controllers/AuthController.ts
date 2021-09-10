@@ -315,6 +315,8 @@ export class AuthController {
 
                     // TODO: Handle opaque tokens properly
                     // If we're doing opaque access token - do not return refresh and id token
+                    // Standard requires id token - Claims removed from id token if opaque is set
+                    // => "opaque"
                     if (config.settings.opaqueAccessToken) {
                         // resultPayload.id_token = undefined; have to return id_token
                         // oidc-client - refresh_token silent renew

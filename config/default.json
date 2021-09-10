@@ -105,6 +105,9 @@
         "token_endpoint_auth_methods_supported": ["client_secret_post"],
         "claims_supported": ["iss", "aud", "sub", "exp", "iat", "act"],
         "code_challenge_methods_supported": ["S256"],
-        "grant_types_supported": ["authorization_code", "refresh_token"]
-    }
+        "grant_types_supported": ["authorization_code", "refresh_token"],
+        "introspection_endpoint": ""
+    },
+    "accessTokenHint": "access_token",
+    "refreshTokenHint": "refresh_token"
 }

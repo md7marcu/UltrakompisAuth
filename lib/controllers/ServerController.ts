@@ -29,12 +29,11 @@ export class ServerController {
         wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
         wellKnownBase.token_endpoint = config.settings.accessTokenEndpoint;
         wellKnownBase.scopes_supported = config.settings.scopes_supported;
-        wellKnownBase.response_types_supported = config.settings.response_types_supported;
         wellKnownBase.jwks_uri = config.settings.jwksEndpoint;
         wellKnownBase.userinfo_endpoint = config.settings.userinfoEndpoint;
         wellKnownBase.revocation_endpoint = "";
-        wellKnownBase.token_endpoint_auth_signing_alg_values_supported = config.settings.token_endpoint_auth_signing_alg_values_supported;
-        wellKnownBase.grant_types_supported = config.settings.grant_types_supported;
+        wellKnownBase.token_endpoint_auth_signing_alg_values_supported = config.settings.jwkAlgorithm;
+        wellKnownBase.introspection_endpoint = config.settings.introspectionEndpoint;
 
         res.status(200).send(wellKnownBase);
     }

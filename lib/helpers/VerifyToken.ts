@@ -41,4 +41,4 @@ const getVerifyOptions = (): VerifyOptions => {
     verifyOptions.algorithms = [config.settings.algorithm];
 
     return verifyOptions;
-}
+};

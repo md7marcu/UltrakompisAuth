@@ -34,12 +34,11 @@ describe("Server routes", () => {
         wellKnownServerSettings.authorization_endpoint = config.settings.authorizationEndpoint;
         wellKnownServerSettings.token_endpoint = config.settings.accessTokenEndpoint;
         wellKnownServerSettings.scopes_supported = config.settings.scopes_supported;
-        wellKnownServerSettings.response_types_supported = config.settings.response_types_supported;
         wellKnownServerSettings.jwks_uri = config.settings.jwksEndpoint;
         wellKnownServerSettings.userinfo_endpoint = config.settings.userinfoEndpoint;
         wellKnownServerSettings.revocation_endpoint = "";
-        wellKnownServerSettings.token_endpoint_auth_signing_alg_values_supported = config.settings.token_endpoint_auth_signing_alg_values_supported;
-        wellKnownServerSettings.grant_types_supported = config.settings.grant_types_supported;
+        wellKnownServerSettings.token_endpoint_auth_signing_alg_values_supported = config.settings.jwkAlgorithm;
+        wellKnownServerSettings.introspection_endpoint = config.settings.introspectionEndpoint;
 
         setHttpsOptions(app);
     });
