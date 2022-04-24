@@ -44,7 +44,7 @@
     "serve-favicon": "^2.5.0",
     "tweetnacl-util": "^0.15.1",
     "typescript": "^3.9.7",
-    "validator": "^13.5.2"
+    "validator": "^13.7.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.2",
