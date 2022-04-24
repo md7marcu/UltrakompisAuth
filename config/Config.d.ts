@@ -4,6 +4,8 @@ declare module "node-config-ts" {
   interface IConfig {
     settings: Settings
     wellKnown: WellKnown
+    accessTokenHint: string
+    refreshTokenHint: string
   }
   interface WellKnown {
     issuer: string
@@ -18,6 +20,7 @@ declare module "node-config-ts" {
     claims_supported: string[]
     code_challenge_methods_supported: string[]
     grant_types_supported: string[]
+    introspection_endpoint: string
   }
   interface Settings {
     issuer: string

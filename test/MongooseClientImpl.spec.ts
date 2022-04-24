@@ -43,7 +43,7 @@ describe("Test Mongoose Client impl.", () => {
             originalCount = count;
         }).exec();
 
-        let userModel = await new ClientModel(client).save();
+        await new ClientModel(client).save();
 
         let newCount: number;
         await ClientModel.countDocuments({}, (error, count) => {
