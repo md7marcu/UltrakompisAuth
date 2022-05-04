@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 import IAccessToken from "./IAccessToken";
 import IIdToken  from "./IIdToken";
 import IRefreshToken from "./IRefreshToken";
@@ -15,4 +16,4 @@ export default interface IUser {
     nonce?: string;
     claims?: string[];
     lastAuthenticated?: string;
-}
+};

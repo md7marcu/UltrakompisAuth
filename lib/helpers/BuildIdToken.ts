@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import { config } from "node-config-ts";
 import IUser from "../interfaces/IUser";

@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-export const ClientSchema: Schema = new Schema({
+export const clientSchema: Schema = new Schema({
     clientId: {
         type: String,
         unique: true,

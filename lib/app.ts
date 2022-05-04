@@ -19,13 +19,13 @@ import * as favicon from "serve-favicon";
 import path = require("path");
 
 export interface IApplication extends express.Application {
-    Db: Db;
+    db: Db;
     httpsOptions: IHttpsOptions;
 }
 
 export class App {
     public app: IApplication;
-    public Db: Db;
+    public db: Db;
     public httpsOptions: IHttpsOptions;
     private authRoutes: AuthRoutes = new AuthRoutes();
     private userRoutes: UserRoutes = new UserRoutes();
@@ -39,7 +39,7 @@ export class App {
         (this.app as any) = express();
         debug.log = console.log.bind(console);
         // Create the "database"
-        this.app.Db = new Db();
+        this.app.db = new Db();
         this.localConfig();
         this.corsConfig();
         this.authRoutes.routes(this.app);
@@ -52,12 +52,11 @@ export class App {
         if (!this.isDev) {
             this.app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
         }
-
         if (config.settings.useMongo) {
             debug("Using MongoDb.");
             this.mongoSetup(this.mongoUrl, this.isDev);
             // If we have saved settings retrieve those and update settings object
-            this.app.Db.getSettings().then((settings) => {
+            this.app.db.getSettings().then((settings) => {
                 config.settings = settings;
                 debug(`Override Settings: ${JSON.stringify(config.settings)}`);
             }).catch((error) => {
@@ -83,19 +82,19 @@ export class App {
         // App engine - html
         this.app.set("view engine", "pug");
         // this.app.engine("html", pug));
-    }
+    };
 
     private corsConfig = () => {
         const whitelist = config.settings.corsWhitelist;
         const corsOptions = {
-          origin: function (origin, callback) {
+            origin: function (origin, callback) {
             // origin is undefined (or "null") when server to server
-            if (origin === "null" || whitelist.indexOf(origin) !== -1 || !origin) {
-              callback(undefined, true);
-            } else {
-              callback(new Error("Cors error."));
-            }
-          },
+                if (origin === "null" || whitelist.indexOf(origin) !== -1 || !origin) {
+                    callback(undefined, true);
+                } else {
+                    callback(new Error("Cors error."));
+                }
+            },
         };
         // Need to allow credentials through CORS
         this.app.use(function(req, res, next) {
@@ -103,31 +102,31 @@ export class App {
             next();
         });
         this.app.use(cors(corsOptions));
-    }
+    };
 
     private mongoSetup = (connectionString: string, isDev: boolean): void => {
 
         if (isDev) {
             const mongoServer = new MongoMemoryServer();
             mongoServer.getUri().then((mongoUri) => {
-              const mongooseOpts = {
-                useNewUrlParser: true,
-                useUnifiedTopology: true,
-              };
-              mongoose.set("useFindAndModify", false);
-              mongoose.connect(mongoUri, mongooseOpts);
+                const mongooseOpts = {
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                };
+                mongoose.set("useFindAndModify", false);
+                mongoose.connect(mongoUri, mongooseOpts);
 
-              mongoose.connection.on("error", (e) => {
-                if (e.message.code === "ETIMEDOUT") {
-                  console.log(e);
-                  mongoose.connect(mongoUri, mongooseOpts);
-                }
-                console.log(e);
-              });
+                mongoose.connection.on("error", (e) => {
+                    if (e.message.code === "ETIMEDOUT") {
+                        console.log(e);
+                        mongoose.connect(mongoUri, mongooseOpts);
+                    }
+                    console.log(e);
+                });
 
-              mongoose.connection.once("open", () => {
-                console.log(`MongoDB successfully connected to ${mongoUri}`);
-              });
+                mongoose.connection.once("open", () => {
+                    console.log(`MongoDB successfully connected to ${mongoUri}`);
+                });
             });
         } else {
             // Use the MongoDB drivers upsert method instead of mongooses
@@ -137,17 +136,17 @@ export class App {
                 useCreateIndex: true,
                 useUnifiedTopology: true,
             }).
-            catch(error =>
-                debug(`Unable to connect to mongodb, error: ${error}`),
-            );
+                catch(error =>
+                    debug(`Unable to connect to mongodb, error: ${error}`),
+                );
         }
         mongoose.connection.once("open", () => {
-            debug(`Connected to MongoDB`);
+            debug("Connected to MongoDB");
         });
         mongoose.connection.on("error", (error) => {
             debug(`Unable to connect to mongodb, error ${error}`);
         });
-    }
+    };
 }
 
 export default new App().app;

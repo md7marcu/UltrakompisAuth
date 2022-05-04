@@ -9,7 +9,7 @@ import { asyncHandler } from "../middleware/AsyncHandler";
 export class UserRoutes {
 
     public routes(app: IApplication): void {
-        let db: Db = app.Db;
+        let db: Db = app.db;
 
         app.post("/users/create", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             userController.addUser(req, res, next, db);

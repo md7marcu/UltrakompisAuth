@@ -12,14 +12,14 @@ export class ViewRoutes {
 
         app.get("/", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             res.render("index",
-            {
-                title: "Authorization Server",
-                endpoints: {
-                    authorizationEndpoint: config.settings.authorizationEndpoint,
-                    accessTokenEndpoint: config.settings.accessTokenEndpoint,
-                    aliveEndpoint: config.settings.aliveEndpoint,
-                },
-            });
+                {
+                    title: "Authorization Server",
+                    endpoints: {
+                        authorizationEndpoint: config.settings.authorizationEndpoint,
+                        accessTokenEndpoint: config.settings.accessTokenEndpoint,
+                        aliveEndpoint: config.settings.aliveEndpoint,
+                    },
+                });
             next();
         }));
 

@@ -12,7 +12,9 @@ export class UserController {
         let user;
         try {
             user = await database.addUser(req?.body?.name, req?.body?.email, req?.body?.password, req?.body?.claims);
-        } catch (err) { next(err); }
+        } catch (err) {
+            next(err);
+        }
         debug(`Sending user: ${JSON.stringify(user)}`);
         res.status(200).send(user);
     }

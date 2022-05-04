@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import "mocha";
 import * as Supertest from "supertest";
 import app  from "../lib/app";

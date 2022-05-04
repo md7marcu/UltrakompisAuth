@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as Debug from "debug";
 import Db from "../db/db";
 import IClient from "interfaces/IClient";
@@ -14,7 +15,7 @@ const debug = Debug("AuthServer:TokenExchangeController:");
 
 export class TokenExchangeController {
 
-    // tslint:disable-next-line:max-line-length
+    // eslint-disable-next-line max-len
     public getTokens = async(db: Db, authorizationHeader: string, body: any, key: Buffer, cert: Buffer): Promise<ITokenExchangeToken> => {
         let client: IClient;
         let clientAuth: IBasicAuth;
@@ -66,11 +67,11 @@ export class TokenExchangeController {
             };
         }
         return undefined; // 401
-    }
+    };
 
     private verifyMayAct = (sub: string, clientId: string): boolean => {
         return sub === clientId;
-    }
+    };
 
     private buildTokenExchangeToken = (subject: string, clientId: string, scope: string[]): IVerifyOptions => {
         let payload = {
@@ -85,5 +86,5 @@ export class TokenExchangeController {
             scope: scope,
         };
         return payload;
-    }
+    };
 }

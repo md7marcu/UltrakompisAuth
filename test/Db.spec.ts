@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable no-unused-expressions */
 import { expect, assert } from "chai";
 import Db from "../lib/db/db";
 import { Guid } from "guid-typescript";

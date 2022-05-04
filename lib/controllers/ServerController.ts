@@ -10,7 +10,7 @@ import IUser from "interfaces/IUser";
 export class ServerController {
 
     public async wellKnownOpenIdConfiguration(req: Request, res: Response, next: NextFunction, database: Db) {
-        debug(`Sending well-known openid configuration`);
+        debug("Sending well-known openid configuration");
         let wellKnownBase = config.wellKnown;
         wellKnownBase.issuer = config.settings.issuer;
         wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
@@ -23,7 +23,7 @@ export class ServerController {
     }
 
     public async wellKnownServer(req: Request, res: Response, next: NextFunction, database: Db) {
-        debug(`Sending well-known server`);
+        debug("Sending well-known server");
         let wellKnownBase = config.wellKnown;
         wellKnownBase.issuer = config.settings.issuer;
         wellKnownBase.authorization_endpoint = config.settings.authorizationEndpoint;
@@ -39,7 +39,7 @@ export class ServerController {
     }
 
     public async certs(req: Request, res: Response, next: NextFunction, cert: Buffer) {
-        debug(`Sending certs`);
+        debug("Sending certs");
         let jwk = (await createJwk(cert)).toJSON();
         jwk.use = config.settings.jwkUse;
         jwk.alg = config.settings.jwkAlgorithm;
@@ -48,7 +48,7 @@ export class ServerController {
     }
 
     public async userInfo(req: IUserRequest, res: Response, next: NextFunction, database: Db) {
-        debug(`Sending User Info`);
+        debug("Sending User Info");
         let user = await database.getUser(req.userId);
 
         if (!user) {

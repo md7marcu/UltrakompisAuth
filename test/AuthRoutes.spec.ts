@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/naming-convention */
 import "mocha";
 import * as Supertest from "supertest";
 import app  from "../lib/app";
@@ -7,8 +10,8 @@ import { expect } from "chai";
 import { config } from "node-config-ts";
 import * as path from "path";
 import { Guid } from "guid-typescript";
-import ClientModel from "../lib/db/ClientModel";
-import UserModel from "../lib/db/UserModel";
+import clientModel from "../lib/db/ClientModel";
+import userModel from "../lib/db/UserModel";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -44,9 +47,9 @@ describe("Auth routes", () => {
     };
 
     before( async() => {
-        await new ClientModel(ukAuthClient).save();
-        await new ClientModel(authClient).save();
-        await UserModel.findOneAndUpdate({email: user.email}, user, {new: true, upsert: true});
+        await new clientModel(ukAuthClient).save();
+        await new clientModel(authClient).save();
+        await userModel.findOneAndUpdate({email: user.email}, user, {new: true, upsert: true});
         setHttpsOptions(app);
     });
 
@@ -118,10 +121,10 @@ describe("Auth routes", () => {
         db.saveRequest(requestId, {redirect_uri: "https://localhost:3002/"});
 
         const response = await Supertest(app)
-        .post("/allowRequest")
-        .send(`request_id=${requestId}`)
-        .type("form")
-        .set("Accept", "application/json");
+            .post("/allowRequest")
+            .send(`request_id=${requestId}`)
+            .type("form")
+            .set("Accept", "application/json");
 
         expect(response.status).to.be.equal(302);
         expect(JSON.stringify(response.header)).to.contain("Access%20Denied.");
@@ -129,21 +132,21 @@ describe("Auth routes", () => {
 
     it("Should return 401 if client id is missing", async () => {
         const response = await Supertest(app)
-        .post("/token")
-        .type("form");
+            .post("/token")
+            .type("form");
 
         expect(response.status).to.be.equal(401);
     });
 
     it("Should return 401 if client secret is invalid", async () => {
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: config.settings.clients[0].clientId,
-                client_secret: "invalid secret",
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: config.settings.clients[0].clientId,
+                    client_secret: "invalid secret",
+                });
 
         expect(response.status).to.be.equal(401);
         expect(response.text).to.contain("Invalid client secret.");
@@ -151,13 +154,13 @@ describe("Auth routes", () => {
 
     it("Should return 400 if grant type is invalid", async () => {
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: config.settings.clients[0].clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: config.settings.clients[0].clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                });
 
         expect(response.status).to.be.equal(400);
         expect(response.text.toLowerCase()).to.contain("Invalid Grant.".toLowerCase());
@@ -165,15 +168,15 @@ describe("Auth routes", () => {
 
     it("Should return 401 if supplied code is not valid", async () => {
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: config.settings.clients[0].clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.authorizationCodeGrant,
-                code: "invalidCode",
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: config.settings.clients[0].clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.authorizationCodeGrant,
+                    code: "invalidCode",
+                });
 
         expect(response.status).to.be.equal(401);
         expect(response.text).to.contain("Invalid code.");
@@ -185,15 +188,15 @@ describe("Auth routes", () => {
         db.saveAuthorizationCode(code,  {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], email: user.email});
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.authorizationCodeGrant,
-                authorization_code: code,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.authorizationCodeGrant,
+                    authorization_code: code,
+                });
 
         expect(response.status).to.be.equal(200);
         expect(response.text).to.contain("refresh_token");
@@ -206,15 +209,15 @@ describe("Auth routes", () => {
         config.settings.opaqueAccessToken = true;
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.authorizationCodeGrant,
-                authorization_code: code,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.authorizationCodeGrant,
+                    authorization_code: code,
+                });
 
         expect(response.status).to.be.equal(200);
         let accessToken = JSON.parse(response.text).access_token;
@@ -227,15 +230,15 @@ describe("Auth routes", () => {
         db.saveAuthorizationCode(code, {request: {client_id: clientId, scope: ["ssn"]}, scope: ["ssn"], email: user.email});
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.authorizationCodeGrant,
-                authorization_code: code,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.authorizationCodeGrant,
+                    authorization_code: code,
+                });
 
         expect(response.status).to.be.equal(200);
         let accessToken = JSON.parse(response.text).access_token;
@@ -251,15 +254,15 @@ describe("Auth routes", () => {
         await db.saveRefreshToken("cba321", "3232", ["ssn"], user.email);
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.refreshTokenGrant,
-                refresh_token: "cba321",
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.refreshTokenGrant,
+                    refresh_token: "cba321",
+                });
 
         expect(response.status).to.be.equal(400);
         expect(response.text).to.contain("Called with invalid refresh token.");
@@ -273,15 +276,15 @@ describe("Auth routes", () => {
         await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.refreshTokenGrant,
-                refresh_token: refreshToken,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.refreshTokenGrant,
+                    refresh_token: refreshToken,
+                });
 
         expect(response.status).to.be.equal(200);
 
@@ -300,15 +303,15 @@ describe("Auth routes", () => {
         await db.saveRefreshTokenToUser(user.email, refreshToken, clientId, ["ssn"]);
 
         const response = await Supertest(app)
-        .post("/token")
-        .type("form")
-        .send(
-            {
-                client_id: clientId,
-                client_secret: config.settings.clients[0].clientSecret,
-                grant_type: config.settings.refreshTokenGrant,
-                refresh_token: refreshToken,
-            });
+            .post("/token")
+            .type("form")
+            .send(
+                {
+                    client_id: clientId,
+                    client_secret: config.settings.clients[0].clientSecret,
+                    grant_type: config.settings.refreshTokenGrant,
+                    refresh_token: refreshToken,
+                });
 
         expect(response.status).to.be.equal(200);
 

@@ -59,7 +59,7 @@ describe("Server routes", () => {
 
     it("Should return 200 and server certificate", async () => {
         let response = await Supertest(app)
-        .get("/oauth2/certs");
+            .get("/oauth2/certs");
 
         expect(response.status).equal(200);
         expect(JSON.parse(response.text).keys[0].kid).to.be.equal(serverKid);

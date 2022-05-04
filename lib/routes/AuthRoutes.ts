@@ -50,5 +50,5 @@ export class AuthRoutes {
             req.body.authenticated = await compare(password, user?.password);
         }
         next();
-    }
+    };
 }

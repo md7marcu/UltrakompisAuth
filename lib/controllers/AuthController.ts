@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { Request, Response, NextFunction  } from "express";
 import { IRequest } from "../interfaces/IRequest";
 import * as Debug from "debug";
@@ -23,14 +24,14 @@ export class AuthController {
 
     public async root(req: IRequest, res: Response, next: NextFunction) {
         res.render("index",
-        {
-            title: "Authorization Server",
-            endpoints: {
-                authorizationEndpoint: config.settings.authorizationEndpoint,
-                accessTokenEndpoint: config.settings.accessTokenEndpoint,
-                aliveEndpoint: config.settings.aliveEndpoint,
-            },
-        });
+            {
+                title: "Authorization Server",
+                endpoints: {
+                    authorizationEndpoint: config.settings.authorizationEndpoint,
+                    accessTokenEndpoint: config.settings.accessTokenEndpoint,
+                    aliveEndpoint: config.settings.aliveEndpoint,
+                },
+            });
     }
 
     public async alive(req: IRequest, res: Response, next: NextFunction) {
@@ -43,23 +44,25 @@ export class AuthController {
 
         if (config.settings.verifyClientId && !client) {
             res.render("authError",
-            {
-                title: "Authorization Errors",
-                error: "Unknown Client Id.",
-            });
+                {
+                    title: "Authorization Errors",
+                    error: "Unknown Client Id.",
+                });
             return;
         }
 
         // 2. Verify Redirect URL
         let redirectUrl = (req?.query?.redirect_uri ?? "").toString();
-        let invalidRedirectUri = findIndex(client?.redirectUris ?? "", (r) => { return r === redirectUrl; }) < 0;
+        let invalidRedirectUri = findIndex(client?.redirectUris ?? "", (r) => {
+            return r === redirectUrl;
+        }) < 0;
 
         if (config.settings.verifyRedirectUrl && invalidRedirectUri) {
             res.render("authError",
-            {
-                title: "Authorization Errors",
-                error: "Invalid Redirect URL.",
-            });
+                {
+                    title: "Authorization Errors",
+                    error: "Invalid Redirect URL.",
+                });
             return;
         }
         let queryScope: string[];
@@ -76,9 +79,9 @@ export class AuthController {
         if (config.settings.validateScope && invalidScope) {
             res.redirect(
                 buildUrl(redirectUrl,
-                {
-                    queryParams: { error: "Invalid Scope."},
-                }));
+                    {
+                        queryParams: { error: "Invalid Scope."},
+                    }));
 
             return;
         }
@@ -113,10 +116,10 @@ export class AuthController {
 
         if (!query) {
             res.render("authError",
-            {
-                title: "Authorization Errors",
-                error: "Could not find authorization request.",
-            });
+                {
+                    title: "Authorization Errors",
+                    error: "Could not find authorization request.",
+                });
 
             return;
         }
@@ -127,10 +130,10 @@ export class AuthController {
 
             if (selectedScope && this.isOpenIdConnectFlow(selectedScope) && !req.body.authenticated) {
                 res.render("authError",
-                {
-                    title: "Authentication Error",
-                    error: "Wrong credentials supplied.",
-                });
+                    {
+                        title: "Authentication Error",
+                        error: "Wrong credentials supplied.",
+                    });
                 return;
             }
 
@@ -160,11 +163,11 @@ export class AuthController {
 
                 if (config.settings.verifyState) {
                     queryParams = {
-                            queryParams: {
-                                state: query.state,
-                                code: codeId,
-                            },
-                        };
+                        queryParams: {
+                            state: query.state,
+                            code: codeId,
+                        },
+                    };
                 } else {
                     queryParams = {queryParams: { code: codeId }};
                 }
@@ -176,7 +179,7 @@ export class AuthController {
                 res.redirect(buildUrl(query.redirect_uri, { queryParams: { error: "Invalid response type"}}));
 
                 return;
-                }
+            }
         } else {
             let url = buildUrl(query.redirect_uri, { queryParams: { error: "Access Denied."}});
             res.redirect(url);
@@ -191,7 +194,7 @@ export class AuthController {
 
         if (req.body?.grant_type === config.settings.clientCredentialsGrant) {
             let clientCredentialsController = new ClientCredentialsController();
-            let token = await clientCredentialsController.getTokens(app.Db, req?.headers?.authorization, app.httpsOptions.key);
+            let token = await clientCredentialsController.getTokens(app.db, req?.headers?.authorization, app.httpsOptions.key);
 
             if (token === undefined) {
                 next(new ErrorResponse("Unknown Client or invalid Secret", 401));
@@ -203,8 +206,8 @@ export class AuthController {
 
         if (req.body?.grant_type === config.settings.tokenExchangeGrant) {
             let tokenExchangeController = new TokenExchangeController();
-            let token = await tokenExchangeController.getTokens(app.Db, req?.headers?.authorization,
-                                                                req?.body, app.httpsOptions.key, app.httpsOptions.cert);
+            let token = await tokenExchangeController.getTokens(app.db, req?.headers?.authorization,
+                req?.body, app.httpsOptions.key, app.httpsOptions.cert);
 
             if (token === undefined) {
                 next(new ErrorResponse("Unknown error for token exchange.", 401));
@@ -228,7 +231,7 @@ export class AuthController {
             return;
         }
 
-        let client: IClient = await app.Db.getClient(clientId);
+        let client: IClient = await app.db.getClient(clientId);
 
         if (!client) {
             debug(`Could not find client: ${clientId}`);
@@ -249,23 +252,23 @@ export class AuthController {
             let code = this.getAuthorizationCode(req.body);
 
             // fresh or replayed token
-            if (config.settings.verifyCode && !app.Db.validAuthorizationCode(code)) {
+            if (config.settings.verifyCode && !app.db.validAuthorizationCode(code)) {
                 debug(`Authorization Code is invalid (authorization_code/code): ${req.body.authorization_code} / ${req.body.code}`);
                 next(new ErrorResponse("Invalid code.", 401));
 
                 return;
             }
 
-            let authorizationCodeRequest = app.Db.getAuthorizationCode(code);
+            let authorizationCodeRequest = app.db.getAuthorizationCode(code);
 
             if (authorizationCodeRequest) {
                 // remove code so it cannot be reused
                 if (config.settings.clearAuthorizationCode) {
-                    app.Db.deleteAuthorizationCode(code);
+                    app.db.deleteAuthorizationCode(code);
                 }
 
                 if (config.settings.verifyClientId && authorizationCodeRequest.request.client_id === clientId) {
-                    let user = await app.Db.getUserByEmail(authorizationCodeRequest?.email);
+                    let user = await app.db.getUserByEmail(authorizationCodeRequest?.email);
                     let accessToken: string;
 
                     if (config.settings.opaqueAccessToken) {
@@ -294,17 +297,17 @@ export class AuthController {
 
                     if (config.settings.saveAccessToken) {
                         if (openIdConnectFlow) {
-                            app.Db.saveAccessTokenToUser(authorizationCodeRequest?.email, accessToken);
+                            app.db.saveAccessTokenToUser(authorizationCodeRequest?.email, accessToken);
                         } else {
-                            app.Db.saveAccessToken(accessToken, clientId);
+                            app.db.saveAccessToken(accessToken, clientId);
                         }
                     }
                     let refreshToken = getRandomString(config.settings.refreshTokenLength);
 
                     if (openIdConnectFlow) {
-                        app.Db.saveRefreshTokenToUser(authorizationCodeRequest.email, refreshToken, clientId, authorizationCodeRequest.scope);
+                        app.db.saveRefreshTokenToUser(authorizationCodeRequest.email, refreshToken, clientId, authorizationCodeRequest.scope);
                     } else {
-                        app.Db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scope, authorizationCodeRequest.email);
+                        app.db.saveRefreshToken(refreshToken, clientId, authorizationCodeRequest.scope, authorizationCodeRequest.email);
                     }
                     let resultPayload = {access_token: accessToken, refresh_token: refreshToken, id_token: undefined };
 
@@ -339,18 +342,18 @@ export class AuthController {
             }
         } else if (req.body.grant_type === config.settings.refreshTokenGrant) {
             // Check if we have the refresh token (with related data), i.e. valid refresh token
-            let refreshTokenData = await app.Db.getRefreshToken(req?.body?.refresh_token ?? "");
+            let refreshTokenData = await app.db.getRefreshToken(req?.body?.refresh_token ?? "");
 
             if (refreshTokenData) {
                 debug("Verified refresh token.");
 
                 if (config.settings.verifyClientIdOnRefreshToken && refreshTokenData.clientId !== clientId) {
-                     debug("Client mismatch on refresh token.");
-                     next(new ErrorResponse("Invalid client on refresh token.", 400));
+                    debug("Client mismatch on refresh token.");
+                    next(new ErrorResponse("Invalid client on refresh token.", 400));
 
                     return;
                 }
-                let user = await app.Db.getUserByEmail(refreshTokenData.email);
+                let user = await app.db.getUserByEmail(refreshTokenData.email);
                 let accessToken: string;
 
                 if (config.settings.opaqueAccessToken) {
@@ -362,9 +365,9 @@ export class AuthController {
 
                 if (config.settings.saveAccessToken) {
                     if (refreshTokenData.email) {
-                        app.Db.saveAccessTokenToUser(refreshTokenData.email, accessToken);
+                        app.db.saveAccessTokenToUser(refreshTokenData.email, accessToken);
                     } else {
-                        app.Db.saveAccessToken(accessToken, clientId);
+                        app.db.saveAccessToken(accessToken, clientId);
                     }
                 }
                 let idToken = await this.createIdToken(clientId, user, app, refreshTokenData?.email);
@@ -386,43 +389,42 @@ export class AuthController {
 
     private getAuthorizationCode = (body: any): string => {
         return body.authorization_code ?? body.code;
-    }
+    };
 
     private isOpenIdConnectFlow = (scope: any): boolean => {
         let tmpScope = Array.isArray(scope) ? scope?.toString() : scope;
 
         return tmpScope.split(",").findIndex((x) => x === "openid") > -1;
-    }
+    };
 
     private openIdFlow = (queryScope: string[]) => {
         return queryScope?.includes("openid");
-    }
+    };
 
     private getScopeFromRequest = (request: any) => {
         return request.scope ?? request.scopes;
-    }
+    };
 
     private async createIdToken(clientId: string, user: IUser, app: IApplication, email: string): Promise<string> {
         let idToken = await buildIdToken(clientId, user);
-        // tslint:disable-next-line:variable-name
-        let id_token: string;
+        let signedToken: string;
 
         // TODO: Handle opaque tokens 'properly'
         // Remove claims from id token
         if (config.settings.opaqueAccessToken) {
             idToken.claims = undefined;
-            id_token = signToken(idToken, app.httpsOptions.key);
+            signedToken = signToken(idToken, app.httpsOptions.key);
         } else {
-            id_token = signToken(idToken, app.httpsOptions.key);
+            signedToken = signToken(idToken, app.httpsOptions.key);
         }
-        app.Db.saveIdTokenToUser(email, id_token);
+        app.db.saveIdTokenToUser(email, signedToken);
 
-        return id_token;
+        return signedToken;
     }
 
     // Verify that the client has all scope that's asked for
     private verifyScope(askedScope: string[], clientScope: string[]): boolean {
-       return difference(askedScope, clientScope).length > 0;
+        return difference(askedScope, clientScope).length > 0;
     }
 }
 export const authController = new AuthController();

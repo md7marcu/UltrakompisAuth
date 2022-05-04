@@ -10,7 +10,7 @@ import { config } from "node-config-ts";
 
 export class ServerRoutes {
     public routes(app: IApplication): void {
-        let db: Db = app.Db;
+        let db: Db = app.db;
 
         app.get("/.well-known/openid-configuration", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             serverController.wellKnownOpenIdConfiguration(req, res, next, db);
@@ -48,9 +48,9 @@ export class ServerRoutes {
     private verifyUser = (app: IApplication) => {
         return async(req: IUserRequest, res: Response, next: NextFunction): Promise<any> => {
         // TODO: Missing testS
-           if (config.settings.opaqueAccessToken) {
-               try {
-                   let user = await app.Db.getUserByAccessToken(req?.headers?.authorization?.replace("Bearer ", ""));
+            if (config.settings.opaqueAccessToken) {
+                try {
+                    let user = await app.db.getUserByAccessToken(req?.headers?.authorization?.replace("Bearer ", ""));
 
                     if (user) {
                         req.userId = user.userId;
@@ -65,7 +65,7 @@ export class ServerRoutes {
                 next();
 
                 return;
-           } else {
+            } else {
                 try {
                     let decodedToken = verifyToken(req?.headers?.authorization, app?.httpsOptions?.cert);
 
@@ -80,5 +80,5 @@ export class ServerRoutes {
             }
             next();
         };
-    }
+    };
 }

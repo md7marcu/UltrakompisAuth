@@ -2,7 +2,7 @@ import { Schema } from "mongoose";
 import isEmail  from "validator/lib/isEmail";
 import { hashSync, genSaltSync } from "bcryptjs";
 
-export const UserSchema: Schema = new Schema({
+export const userSchema: Schema = new Schema({
     userId: {
         type: String,
         required: true,
@@ -75,7 +75,7 @@ export const UserSchema: Schema = new Schema({
     enabled: { type: Boolean, default: false},
 });
 
-UserSchema.pre("save", function(next) {
+userSchema.pre("save", function(next) {
     let user: any = this;
     // only hash the password if it has been modified (or is new)
     if (!user.isModified("password")) {

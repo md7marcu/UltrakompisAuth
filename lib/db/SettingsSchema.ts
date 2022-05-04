@@ -1,6 +1,6 @@
 import { Schema } from "mongoose";
 
-export const SettingsSchema: Schema = new Schema({
+export const settingsSchema: Schema = new Schema({
     overrideId: String,
     issuer: String,
     audience: String,

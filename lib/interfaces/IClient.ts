@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 import IAccessToken from "./IAccessToken";
 
 export default interface IClient {
@@ -9,4 +10,4 @@ export default interface IClient {
     enabled: boolean;
     accessTokens?: IAccessToken[];
     refreshTokens?: string[];
-}
+};

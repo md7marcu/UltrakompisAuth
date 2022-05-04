@@ -12,8 +12,10 @@ export class ClientController {
 
         try {
             client = await database.addClient(req?.body?.clientId, req?.body?.clientSecret, req?.body?.redirectUris,
-                                              req?.body?.scope, req?.body?.public);
-        } catch (err) { next(err); }
+                req?.body?.scope, req?.body?.public);
+        } catch (err) {
+            next(err);
+        }
 
         if (client) {
             client.clientSecret = "";

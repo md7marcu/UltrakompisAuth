@@ -7,7 +7,7 @@ import { asyncHandler } from "../middleware/AsyncHandler";
 export class ClientRoutes {
 
     public routes(app: IApplication): void {
-        let db: Db = app.Db;
+        let db: Db = app.db;
 
         app.post("/client/create", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             clientController.addClient(req, res, next, db);
