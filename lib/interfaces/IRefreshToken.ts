@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 export default interface IRefreshToken {
     token: string;
     created: number;
@@ -5,4 +6,4 @@ export default interface IRefreshToken {
     clientId: string;
     scope: string[];
     email: string;
-}
+};

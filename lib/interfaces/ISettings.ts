@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 export default interface ISettings {
     overrideId: String;
     issuer: String;
@@ -50,4 +51,4 @@ export default interface ISettings {
     serverCert: string;
     jwkAlgorithm: string;
     jwkUse: string;
-}
+};

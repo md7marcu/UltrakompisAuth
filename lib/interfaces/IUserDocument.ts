@@ -1,3 +1,4 @@
+/* eslint-disable semi */
 import { Document } from "mongoose";
 import IUser from "../interfaces/IUser";
 

@@ -6,18 +6,21 @@
         {
             "label": "tsc-watch",
             "command": "npm",
-            "args": [ "run", "watch" ],
-            "type":"shell",
+            "args": [
+                "run",
+                "watch"
+            ],
+            "type": "shell",
             "isBackground": true,
-            "group":"build",
+            "group": "build",
             "problemMatcher": "$tsc-watch",
-            "presentation":{
+            "presentation": {
                 "reveal": "always"
             }
         },
         {
             "type": "typescript",
-            "label": "compileTs",            
+            "label": "compileTs",
             "tsconfig": "tsconfig.json",
             "problemMatcher": [
                 "$tsc"
@@ -55,6 +58,13 @@
                 "copyViews",
                 "copyPublic"
             ]
+        },
+        {
+            "type": "npm",
+            "script": "lint",
+            "problemMatcher": [],
+            "label": "npm: lint",
+            "detail": "eslint -c .eslintrc.js --ext .ts lib"
         }
     ]
 }

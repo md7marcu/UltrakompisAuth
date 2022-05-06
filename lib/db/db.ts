@@ -21,7 +21,6 @@ export default class Db {
     private idTokens = [];
     private users: [IUser] = config.settings.users;
     private useMongo: boolean = config.settings.useMongo;
-    private isTest: boolean = process.env.NODE_ENV === "test";
     private maxDate = new Date(8640000000000000);
 
     /* --------------------------------------------- AUTHORIZATION CODE --------------------------------------------- */
@@ -36,7 +35,7 @@ export default class Db {
     }
 
     public validAuthorizationCode(codeId: string): boolean {
-        // tslint:disable-next-line:whitespace
+        // eslint-disable-next-line
         return find(this.authorizationCodes, (c) => {return c.codeId === codeId; }) !== undefined;
     }
 
@@ -45,7 +44,7 @@ export default class Db {
         if (this.useMongo) {
             await new MongoDb().removeAuthorizationCodeFromUser(codeId);
         } else {
-           remove(this.authorizationCodes, (code) => {
+            remove(this.authorizationCodes, (code) => {
                 return code.codeId === codeId;
             });
         }
@@ -60,7 +59,7 @@ export default class Db {
     public getRequest(guid: Guid): any {
         let key = guid?.toString() ?? "";
 
-        // tslint:disable-next-line:whitespace
+        // eslint-disable-next-line
         return find(this.requests, (r) => r.requestId === guid?.toString())?.query ?? "";
     }
 
@@ -79,18 +78,22 @@ export default class Db {
         if (this.useMongo) {
             return await new MongoDb().getClient(clientId);
         } else {
-            return find(this.clients, (c) => { return c.clientId === clientId; });
+            return find(this.clients, (c) => {
+                return c.clientId === clientId;
+            });
         }
     }
 
     public async addClient(clientId: string, clientSecret: string, redirectUris: string[], scope: string[],
-              publicClient: boolean): Promise<IClient> {
+        publicClient: boolean): Promise<IClient> {
         let client: IClient;
 
         if (this.useMongo) {
             try {
                 client = await new MongoDb().addClient(clientId, clientSecret, redirectUris, scope, publicClient);
-            } catch (err) { throw err; }
+            } catch (err) {
+                throw err;
+            }
         } else {
             client = {
                 clientId: clientId,
@@ -111,11 +114,16 @@ export default class Db {
         if (this.useMongo) {
             await new MongoDb().saveClientRefreshToken(clientId, refreshToken);
         } else {
-            let clientIndex = findIndex(this.clients, (element) => { return element.clientId === clientId; } );
+            let clientIndex = findIndex(this.clients, (element) => {
+                return element.clientId === clientId;
+            } );
 
             if (clientIndex >= 0) {
-                this.clients[clientIndex].refreshTokens ? this.clients[clientIndex].refreshTokens.push(refreshToken) :
-                this.clients[clientIndex].refreshTokens = [refreshToken];
+                if (this.clients[clientIndex].refreshTokens){
+                    this.clients[clientIndex].refreshTokens.push(refreshToken);
+                } else {
+                    this.clients[clientIndex].refreshTokens = [refreshToken];
+                }
             }
         }
     }
@@ -125,11 +133,16 @@ export default class Db {
             let decodedToken = (decode(accessToken) as any);
             await new MongoDb().saveClientAccessToken(clientId, accessToken, decodedToken);
         } else {
-            let clientIndex = findIndex(this.clients, (element) => { return element.clientId === clientId; } );
+            let clientIndex = findIndex(this.clients, (element) => {
+                return element.clientId === clientId;
+            } );
 
             if (clientIndex >= 0) {
-                this.clients[clientIndex].accessTokens ? this.clients[clientIndex].accessTokens.push(accessToken) :
-                this.clients[clientIndex].accessTokens = [accessToken];
+                if (this.clients[clientIndex].accessTokens) {
+                    this.clients[clientIndex].accessTokens.push(accessToken);
+                }else {
+                    this.clients[clientIndex].accessTokens = [accessToken];
+                }
             }
         }
     }

@@ -4,7 +4,7 @@ import app  from "../lib/app";
 import { VerifyOptions } from "jsonwebtoken";
 import { expect } from "chai";
 import { Response } from "express";
-import UserModel from "../lib/db/UserModel";
+import userModel from "../lib/db/UserModel";
 import * as Debug from "debug";
 
 interface IVerifyOptions extends VerifyOptions {
@@ -24,30 +24,38 @@ describe("User routes", () => {
         claims: ["duh", "lol"],
         enabled: true,
     };
+
+    const authenticateUser = async (email, password): Promise<any> => {
+        return await Supertest(app)
+            .post("/users/authenticate")
+            .type("form")
+            .send({email: email, password: password});
+    };
+
     before( async() => {
         Debug.disable();
 
         if (process.env.NODE_ENV === "test") {
-            await UserModel.collection.deleteMany({email: user.email.toLowerCase()});
+            await userModel.collection.deleteMany({email: user.email.toLowerCase()});
         }
-        await new UserModel(user).save();
+        await new userModel(user).save();
     });
 
     afterEach(async () => {
         if (process.env.NODE_ENV === "test") {
-            await UserModel.collection.deleteMany({email: testEmail.toLowerCase()});
+            await userModel.collection.deleteMany({email: testEmail.toLowerCase()});
         }
     });
 
     it("Should return 200 when adding a user", async () => {
         const response = await Supertest(app)
-        .post("/users/create")
-        .type("form")
-        .send({
-            name: testName,
-            email: testEmail,
-            password: testPassword,
-        });
+            .post("/users/create")
+            .type("form")
+            .send({
+                name: testName,
+                email: testEmail,
+                password: testPassword,
+            });
         expect(response.status).to.be.equal(200);
         expect(response.body.name).to.be.equal("TestName");
     });
@@ -64,10 +72,4 @@ describe("User routes", () => {
         expect(response.status).to.be.equal(401);
     });
 
-    const authenticateUser = async (email, password): Promise<any> => {
-        return await Supertest(app)
-        .post("/users/authenticate")
-        .type("form")
-        .send({email: email, password: password});
-    };
 });

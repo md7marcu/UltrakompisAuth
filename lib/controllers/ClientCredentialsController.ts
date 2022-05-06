@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as Debug from "debug";
 import Db from "../db/db";
 import IClient from "interfaces/IClient";
@@ -38,5 +39,5 @@ export class ClientCredentialsController {
             };
         }
         return undefined;
-    }
+    };
 }

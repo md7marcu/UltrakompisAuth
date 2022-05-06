@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import "mocha";
 import * as Supertest from "supertest";
 import app  from "../lib/app";
@@ -12,7 +13,7 @@ interface IVerifyOptions extends VerifyOptions {
     aud: string[];
 }
 describe("OIDC authorization code flow", () => {
-    let db = (app as any).Db;
+    let db = (app as any).db;
 
     before( async() => {
         Debug.disable();

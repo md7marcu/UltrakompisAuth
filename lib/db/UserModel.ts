@@ -1,6 +1,6 @@
 import { Model, model } from "mongoose";
-import { UserSchema } from "./UserSchema";
+import { userSchema } from "./UserSchema";
 import IUserDocument from "../interfaces/IUserDocument";
 
-export const UserModel: Model<IUserDocument> = model<IUserDocument>("UserModel", UserSchema);
-export default UserModel;
+export const userModel: Model<IUserDocument> = model<IUserDocument>("UserModel", userSchema);
+export default userModel;

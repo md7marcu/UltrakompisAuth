@@ -1,7 +1,7 @@
 import decodeBase64 from "../helpers/DecodeBase64";
 import IBasicAuth from "../interfaces/IBasicAuth";
 
-export default function getBasicAuth(authorizationHeader:string): IBasicAuth {
+export default function getBasicAuth(authorizationHeader: string): IBasicAuth {
     if (authorizationHeader) {
         let encodedData = authorizationHeader.split(" ")[1] || "";
         let decodedData = decodeBase64(encodedData);

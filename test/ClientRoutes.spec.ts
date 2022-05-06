@@ -4,7 +4,7 @@ import app  from "../lib/app";
 import { VerifyOptions } from "jsonwebtoken";
 import { expect } from "chai";
 import * as Debug from "debug";
-import ClientModel from "../lib/db/ClientModel";
+import clientModel from "../lib/db/ClientModel";
 
 interface IVerifyOptions extends VerifyOptions {
     iss: string;
@@ -29,27 +29,27 @@ describe("Client routes", () => {
         Debug.disable();
 
         if (process.env.NODE_ENV === "test") {
-            await ClientModel.collection.deleteMany({clientId: client.clientId.toLowerCase()});
+            await clientModel.collection.deleteMany({clientId: client.clientId.toLowerCase()});
         }
     });
 
     afterEach(async () => {
         if (process.env.NODE_ENV === "test") {
-            await ClientModel.collection.deleteMany({clientId: client.clientId.toLowerCase()});
+            await clientModel.collection.deleteMany({clientId: client.clientId.toLowerCase()});
         }
     });
 
     it("Should return 200 when adding a client", async () => {
         const response = await Supertest(app)
-        .post("/client/create")
-        .type("form")
-        .send({
-            clientId: testClientId,
-            clientSecret: testClientSecret,
-            redirectUris: testRedirectUris,
-            scope: testScope,
-            public: testPublic,
-        });
+            .post("/client/create")
+            .type("form")
+            .send({
+                clientId: testClientId,
+                clientSecret: testClientSecret,
+                redirectUris: testRedirectUris,
+                scope: testScope,
+                public: testPublic,
+            });
         expect(response.status).to.be.equal(200);
         expect(response.body.clientId).to.be.equal(testClientId);
     });

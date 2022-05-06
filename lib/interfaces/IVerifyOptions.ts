@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import { VerifyOptions } from "jsonwebtoken";
 export interface IVerifyOptions extends VerifyOptions {
     iss: string;

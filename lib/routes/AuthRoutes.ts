@@ -10,7 +10,7 @@ export class AuthRoutes {
     private db;
 
     public routes(app): void {
-        this.db = app.Db;
+        this.db = app.db;
 
         app.get("/", asyncHandler((req: IRequest, res: Response, next: NextFunction) => {
             authController.root(req, res, next);
@@ -50,5 +50,5 @@ export class AuthRoutes {
             req.body.authenticated = await compare(password, user?.password);
         }
         next();
-    }
+    };
 }

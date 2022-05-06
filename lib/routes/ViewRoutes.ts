@@ -8,18 +8,18 @@ export class ViewRoutes {
     private db;
 
     public routes(app): void {
-        this.db = app.Db;
+        this.db = app.db;
 
         app.get("/", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             res.render("index",
-            {
-                title: "Authorization Server",
-                endpoints: {
-                    authorizationEndpoint: config.settings.authorizationEndpoint,
-                    accessTokenEndpoint: config.settings.accessTokenEndpoint,
-                    aliveEndpoint: config.settings.aliveEndpoint,
-                },
-            });
+                {
+                    title: "Authorization Server",
+                    endpoints: {
+                        authorizationEndpoint: config.settings.authorizationEndpoint,
+                        accessTokenEndpoint: config.settings.accessTokenEndpoint,
+                        aliveEndpoint: config.settings.aliveEndpoint,
+                    },
+                });
             next();
         }));
 
@@ -36,7 +36,6 @@ export class ViewRoutes {
         }));
 
         app.post("/settings", asyncHandler((req: Request, res: Response, next: NextFunction) => {
-            console.log(`request: ${JSON.stringify(req?.body)}`);
             next();
         }));
     }
