@@ -33,7 +33,7 @@ export class App {
     private clientRoutes: ClientRoutes = new ClientRoutes();
     private serverRoutes: ServerRoutes = new ServerRoutes();
     private mongoUrl: string = process.env.MONGODB_URL;
-    private isDev: boolean = process.env.NODE_ENV === "test";
+    private isTest: boolean = process.env.NODE_ENV === "test";
 
     constructor() {
         (this.app as any) = express();
@@ -49,12 +49,12 @@ export class App {
         this.clientRoutes.routes(this.app);
         this.app.use(errorHandler);
 
-        if (!this.isDev) {
+        if (!this.isTest) {
             this.app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
         }
         if (config.settings.useMongo) {
             debug("Using MongoDb.");
-            this.mongoSetup(this.mongoUrl, this.isDev);
+            this.mongoSetup(this.mongoUrl, this.isTest);
             // If we have saved settings retrieve those and update settings object
             this.app.db.getSettings().then((settings) => {
                 config.settings = settings;
@@ -64,7 +64,7 @@ export class App {
             });
         }
 
-        if (this.isDev) {
+        if (this.isTest) {
             debug("Running in development mode.");
         }
     }
@@ -104,9 +104,9 @@ export class App {
         this.app.use(cors(corsOptions));
     };
 
-    private mongoSetup = (connectionString: string, isDev: boolean): void => {
+    private mongoSetup = (connectionString: string, isTest: boolean): void => {
 
-        if (isDev) {
+        if (isTest) {
             const mongoServer = new MongoMemoryServer();
             mongoServer.getUri().then((mongoUri) => {
                 const mongooseOpts = {

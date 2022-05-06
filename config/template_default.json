@@ -87,5 +87,7 @@
             "claims_supported": ["iss", "aud", "sub", "exp", "iat", "act"],
             "code_challenge_methods_supported": ["S256"],
             "grant_types_supported": ["authorization_code", "refresh_token"]
-        }
+        },
+        "accessTokenHint": "access_token",
+        "refreshTokenHint": "refresh_token"
 }

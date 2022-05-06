@@ -89,7 +89,7 @@ export default class MongoDb {
     }
 
     public async validateRefreshToken(refreshToken: string): Promise<boolean> {
-        let user = await userModel.findOne({ refreshTokens: {$elemMatch: {token: refreshToken}}}).lean();
+        let user = await userModel.findOne({ refreshTokens: {$elemMatch: {token: refreshToken}}}).lean() ?? undefined;
 
         return user !== undefined;
     }
@@ -104,19 +104,13 @@ export default class MongoDb {
     public async getSettings(): Promise<ISettings> {
         let localSettings = await settingsModel.findOne({overrideId: config.settings.overrideId});
 
-        if (localSettings === undefined) {
-            return config.settings;
-        }
-        return localSettings;
+        return localSettings ?? config.settings;
     }
 
     // need to pass in the settings after they've been saved
     public async upsertSettings(settings: ISettings): Promise<ISettings> {
-        debug(`upsertSettings: ${JSON.stringify(config.settings)}`);
-        let savedSettings = await settingsModel.findOne({overrideId: config.settings.overrideId});
-
-        let localSettings = settings === undefined ? config.settings : settings;
-        console.log(`insert: ${JSON.stringify(settings)}`);
+        await settingsModel.findOne({overrideId: config.settings.overrideId});
+        let localSettings = settings ?? config.settings;
 
         return await settingsModel.findOneAndUpdate({overrideId: config.settings.overrideId}, localSettings, {
             new: true,
@@ -147,7 +141,7 @@ export default class MongoDb {
     }
 
     public async validateClientRefreshToken(refreshToken: string): Promise<boolean> {
-        let user = await clientModel.findOne({ refreshTokens: refreshToken}).lean();
+        let user = await clientModel.findOne({ refreshTokens: refreshToken}).lean() ?? undefined;
 
         return user !== undefined;
     }

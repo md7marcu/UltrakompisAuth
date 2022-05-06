@@ -13,7 +13,7 @@ interface IVerifyOptions extends VerifyOptions {
     aud: string[];
 }
 describe("OIDC authorization code flow", () => {
-    let db = (app as any).Db;
+    let db = (app as any).db;
 
     before( async() => {
         Debug.disable();

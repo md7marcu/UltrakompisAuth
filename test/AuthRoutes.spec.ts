@@ -19,7 +19,7 @@ interface IVerifyOptions extends VerifyOptions {
 }
 
 describe("Auth routes", () => {
-    let db = (app as any).Db;
+    let db = (app as any).db;
 
     let user = {
         userId: "12345678",

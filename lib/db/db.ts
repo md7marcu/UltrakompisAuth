@@ -21,7 +21,6 @@ export default class Db {
     private idTokens = [];
     private users: [IUser] = config.settings.users;
     private useMongo: boolean = config.settings.useMongo;
-    private isTest: boolean = process.env.NODE_ENV === "test";
     private maxDate = new Date(8640000000000000);
 
     /* --------------------------------------------- AUTHORIZATION CODE --------------------------------------------- */
