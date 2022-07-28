@@ -1,4 +1,4 @@
-{    
+{
     "settings": {
         "issuer": "authorize.ultrakompis.com",
         "audience": "api.ultrakompis.com",
@@ -24,14 +24,14 @@
         "removeExpiredRefreshTokens": true,
         "removeExpiredIdTokens": true,
         "refreshTokenLength": 64,
-        "corsWhitelist": [],
+        "corsWhitelist": ["https://localhost:3002"],
         "expiryTime": 3600,
         "tokenExchangeExpiryTime": 60,
         "createdTimeAgo": 30,
         "addNonceToAccessToken": true,
         "saveAccessToken": true,
         "authorizationCodeGrant": "authorization_code",
-        "clientCredentialsGrant": "client_credentials",        
+        "clientCredentialsGrant": "client_credentials",
         "refreshTokenGrant": "refresh_token",
         "tokenExchangeGrant": "urn:ietf:params:oauth:grant-type:token-exchange",
         "bearerTokenType": "bearer",
@@ -65,9 +65,9 @@
                 "clientId": "public-client",
                 "public": true,
                 "redirectUris": [
-                    "http://localhost:4200/callback", 
+                    "http://localhost:4200/callback",
                     "http://localhost:4200/authenticated",
-                    "http://192.168.86.127:4200/callback", 
+                    "http://192.168.86.127:4200/callback",
                     "http://192.168.86.127:4200/authenticated"],
                 "scope": ["openid"]
             },

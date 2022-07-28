@@ -47,7 +47,7 @@ declare module "node-config-ts" {
     removeExpiredRefreshTokens: boolean
     removeExpiredIdTokens: boolean
     refreshTokenLength: number
-    corsWhitelist: any[]
+    corsWhitelist: string[]
     expiryTime: number
     tokenExchangeExpiryTime: number
     createdTimeAgo: number

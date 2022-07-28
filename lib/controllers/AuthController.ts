@@ -68,10 +68,11 @@ export class AuthController {
         let queryScope: string[];
 
         let scope = this.getScopeFromRequest(req?.query);
+
         // 3. Verify Scope/s
         if (scope) {
             let tmpScope = Array.isArray(scope) ? scope?.toString() : ((scope ?? "") as string);
-            queryScope = tmpScope.split(",");
+            queryScope = tmpScope.split(" ");
         }
         let openIdFlow = this.openIdFlow(queryScope);
         let invalidScope = this.verifyScope(queryScope, client.scope);
@@ -321,9 +322,9 @@ export class AuthController {
                     // Standard requires id token - Claims removed from id token if opaque is set
                     // => "opaque"
                     if (config.settings.opaqueAccessToken) {
-                        // resultPayload.id_token = undefined; have to return id_token
+                        resultPayload.id_token = undefined; //have to return id_token
                         // oidc-client - refresh_token silent renew
-                        // resultPayload.refresh_token = undefined;
+                        resultPayload.refresh_token = undefined;
                     }
                     res.status(200).send(resultPayload);
 
@@ -394,7 +395,7 @@ export class AuthController {
     private isOpenIdConnectFlow = (scope: any): boolean => {
         let tmpScope = Array.isArray(scope) ? scope?.toString() : scope;
 
-        return tmpScope.split(",").findIndex((x) => x === "openid") > -1;
+        return tmpScope.split(" ").findIndex((x) => x === "openid") > -1;
     };
 
     private openIdFlow = (queryScope: string[]) => {

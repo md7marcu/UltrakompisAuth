@@ -9,7 +9,6 @@ export const clientSchema: Schema = new Schema({
     clientSecret: {
         type: String,
         required: false,
-        unique: true,
     },
     redirectUris: [{
         type: String,

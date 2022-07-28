@@ -2,7 +2,6 @@ import { IVerifyOptions } from "../interfaces/IVerifyOptions";
 import { config } from "node-config-ts";
 import IUser from "../interfaces/IUser";
 import getRandomString from "./GetRandomString";
-import { Guid } from "guid-typescript";
 
 export async function buildUserAccessToken(scope: string[], clientId: string, user: IUser): Promise<IVerifyOptions> {
     let payload = {

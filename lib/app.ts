@@ -18,9 +18,11 @@ import { MongoMemoryServer } from "mongodb-memory-server";
 import * as favicon from "serve-favicon";
 import path = require("path");
 
+type VoidFunctionType = () => void;
 export interface IApplication extends express.Application {
     db: Db;
     httpsOptions: IHttpsOptions;
+    initialize(): VoidFunctionType;
 }
 
 export class App {
@@ -52,17 +54,7 @@ export class App {
         if (!this.isTest) {
             this.app.use(favicon(path.join(__dirname, "public", "favicon.ico")));
         }
-        if (config.settings.useMongo) {
-            debug("Using MongoDb.");
-            this.mongoSetup(this.mongoUrl, this.isTest);
-            // If we have saved settings retrieve those and update settings object
-            this.app.db.getSettings().then((settings) => {
-                config.settings = settings;
-                debug(`Override Settings: ${JSON.stringify(config.settings)}`);
-            }).catch((error) => {
-                debug(`Exception while getting settings: ${error}`);
-            });
-        }
+        this.initialize();
 
         if (this.isTest) {
             debug("Running in development mode.");
@@ -104,29 +96,28 @@ export class App {
         this.app.use(cors(corsOptions));
     };
 
-    private mongoSetup = (connectionString: string, isTest: boolean): void => {
+    private mongoSetup = async (connectionString: string, isTest: boolean): Promise<void> => {
 
         if (isTest) {
-            const mongoServer = new MongoMemoryServer();
-            mongoServer.getUri().then((mongoUri) => {
-                const mongooseOpts = {
-                    useNewUrlParser: true,
-                    useUnifiedTopology: true,
-                };
-                mongoose.set("useFindAndModify", false);
-                mongoose.connect(mongoUri, mongooseOpts);
+            const mongoServer = await MongoMemoryServer.create();
+            let mongoUri = await mongoServer.getUri();
+            const mongooseOpts = {
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+            };
+            mongoose.set("useFindAndModify", false);
+            mongoose.connect(mongoUri, mongooseOpts);
 
-                mongoose.connection.on("error", (e) => {
-                    if (e.message.code === "ETIMEDOUT") {
-                        console.log(e);
-                        mongoose.connect(mongoUri, mongooseOpts);
-                    }
+            mongoose.connection.on("error", (e) => {
+                if (e.message.code === "ETIMEDOUT") {
                     console.log(e);
-                });
+                    mongoose.connect(mongoUri, mongooseOpts);
+                }
+                console.log(e);
+            });
 
-                mongoose.connection.once("open", () => {
-                    console.log(`MongoDB successfully connected to ${mongoUri}`);
-                });
+            mongoose.connection.once("open", () => {
+                console.log(`MongoDB successfully connected to ${mongoUri}`);
             });
         } else {
             // Use the MongoDB drivers upsert method instead of mongooses
@@ -147,6 +138,20 @@ export class App {
             debug(`Unable to connect to mongodb, error ${error}`);
         });
     };
+
+    private async initialize() {
+        if (config.settings.useMongo) {
+            debug("Using MongoDb.");
+            this.mongoSetup(this.mongoUrl, this.isTest);
+            // If we have saved settings retrieve those and update settings object
+            this.app.db.getSettings().then((settings) => {
+                config.settings = settings;
+                debug(`Override Settings: ${JSON.stringify(config.settings)}`);
+            }).catch((error) => {
+                debug(`Exception while getting settings: ${error}`);
+            });
+        }
+    }
 }
 
 export default new App().app;

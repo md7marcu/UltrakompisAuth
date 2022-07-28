@@ -1,5 +1,5 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
     // for the documentation about the tasks.json format
     "version": "2.0.0",
     "tasks": [
@@ -30,25 +30,20 @@
         {
             "label": "copyViews",
             "type": "shell",
-            "command": "xcopy",
+            "command": "cp",
             "args": [
-                "lib\\Views\\*",
-                "dist\\views\\*",
-                "/s",
-                "/i",
-                "/Y"
+                "lib/Views/*",
+                "dist/views/",
             ]
         },
         {
             "label": "copyPublic",
             "type": "shell",
-            "command": "xcopy",
+            "command": "cp",
             "args": [
+                "-R",
                 "public",
-                "dist\\public",
-                "/s",
-                "/i",
-                "/Y"
+                "dist/public",
             ]
         },
         {
