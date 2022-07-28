@@ -8,6 +8,7 @@ import IRefreshToken from "interfaces/IRefreshToken";
 import clientModel from "./ClientModel";
 import IClient from "interfaces/IClient";
 import { Guid } from "guid-typescript";
+import { sanitize } from "mongo-sanitize";
 
 const debug = Debug("AuthServer:MongoDB");
 debug.log = console.log.bind(console);
@@ -102,17 +103,18 @@ export default class MongoDb {
 
     // --------------------------------------------- SETTINGS ---------------------------------------------
     public async getSettings(): Promise<ISettings> {
-        let localSettings = await settingsModel.findOne({overrideId: config.settings.overrideId});
+        let sanitized = sanitize(config.settings.overrideId);
+        let localSettings = await settingsModel.findOne({overrideId: sanitized});
 
         return localSettings ?? config.settings;
     }
 
     // need to pass in the settings after they've been saved
     public async upsertSettings(settings: ISettings): Promise<ISettings> {
-        await settingsModel.findOne({overrideId: config.settings.overrideId});
+        let sanitized = sanitize(config.settings.overrideId);
         let localSettings = settings ?? config.settings;
 
-        return await settingsModel.findOneAndUpdate({overrideId: config.settings.overrideId}, localSettings, {
+        return await settingsModel.findOneAndUpdate({overrideId: sanitized}, localSettings, {
             new: true,
             upsert: true,
         }).catch((error) => {
