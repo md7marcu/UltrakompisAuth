@@ -34,7 +34,17 @@
             "args": [
                 "lib/Views/*",
                 "dist/views/",
-            ]
+            ],
+            "windows": {
+                "command": "xcopy",
+                "args": [
+                    "lib\\Views\\*",
+                    "dist\\views\\*",
+                    "/s",
+                    "/i",
+                    "/Y"
+                ]
+            },
         },
         {
             "label": "copyPublic",
@@ -44,7 +54,17 @@
                 "-R",
                 "public",
                 "dist/public",
-            ]
+            ],
+            "windows": {
+                "command": "xcopy",
+                "args": [
+                    "public",
+                    "dist\\public",
+                    "/s",
+                    "/i",
+                    "/Y" 
+                ]
+            }
         },
         {
             "label": "build",
