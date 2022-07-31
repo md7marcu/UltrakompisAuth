@@ -38,6 +38,7 @@ export default class MongoDb {
                 password: password,
                 claims: claims,
                 enabled: false,
+                activationCode: Guid.create().toString(),
             }).save();
     }
 
@@ -45,11 +46,10 @@ export default class MongoDb {
         return await userModel.findOne({userId: userId, enabled: true}).lean();
     }
 
-    public async getUserByEmail(email: string): Promise<IUser> {
-        return await userModel.findOne({email: email, enabled: true}).lean();
+    public async getUserByEmail(email: string, enabled = true): Promise<IUser> {
+        return await userModel.findOne({email: email, enabled: enabled}).lean();
     }
 
-    // TODO: Missing test
     public async activateUser(email: string): Promise<IUser> {
         return await userModel.findOneAndUpdate({email: email}, {enabled: true, activationCode: ""})
             .catch((error) => {
@@ -57,7 +57,6 @@ export default class MongoDb {
             });
     }
 
-    // TODO: Missing test
     public async getUserByAccessToken(token: string): Promise<IUser> {
         let user = await userModel.findOne({ accessTokens: {$elemMatch: {token: token}}}).lean();
 

@@ -73,6 +73,7 @@ export const userSchema: Schema = new Schema({
     nonce: String,
     lastAuthenticated: String,
     enabled: { type: Boolean, default: false},
+    activationCode: { type: String},
 });
 
 userSchema.pre("save", function(next) {

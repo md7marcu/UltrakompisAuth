@@ -218,14 +218,16 @@ export class AuthController {
             return;
         }
 
-        if (req.body.client_id) {
+        // TODO: missing test - not tested at all
+        if (req.headers.authorization){
+            const base64Credentials = req.headers.authorization.split(" ")[1];
+            const credentials = Buffer.from(base64Credentials, "base64").toString("ascii");
+            [clientId, clientSecret] = credentials.split(":");
+        } else if (req.body.client_id) {
             clientId = req.body.client_id;
             // if this is a public client client_secret will not be defined
             clientSecret = req.body.client_secret;
         } else {
-            // TODO: Check header for clientId and secret
-            // basic auth clientid:clientsecret	var headers = {
-            // header "Authorization": "Basic "  + client_id ":" client_secret
             debug(`Client id or secret are invalid ${req.body.client_id}/`);
             next(new ErrorResponse(`Client id or secret are invalid ${req.body.client_id}`, 401));
 
@@ -322,7 +324,7 @@ export class AuthController {
                     // Standard requires id token - Claims removed from id token if opaque is set
                     // => "opaque"
                     if (config.settings.opaqueAccessToken) {
-                        resultPayload.id_token = undefined; //have to return id_token
+                        resultPayload.id_token = undefined; // have to return id_token
                         // oidc-client - refresh_token silent renew
                         resultPayload.refresh_token = undefined;
                     }

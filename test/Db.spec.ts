@@ -96,4 +96,33 @@ describe ("Static Db implementation", () => {
         // tslint:disable-next-line:no-unused-expression
         expect(isMatch).to.be.true;
     });
+
+    it ("Should activate a user", async () => {
+        let db = new Db();
+        const email = "kaka@kaka.nu";
+        let user = await db.addUser("ken", email, "ken", undefined);
+        let activationCode = user.activationCode;
+        let beforeActivation = user.enabled;
+
+        await db.activateUser(email, activationCode);
+        let activatedUser = await db.getUserByEmail(email);
+        let afterActivation = activatedUser.enabled;
+
+        expect(activationCode).not.undefined;
+        expect(activatedUser.activationCode).to.be.undefined;
+        expect(beforeActivation).to.be.false;
+        expect(afterActivation).to.be.true;
+    });
+
+    it ("Should get user by access code.", async () => {
+        let db = new Db();
+        const email = "kaka@ken.nu";
+        const token = "test2";
+        await db.addUser("ken", email, "ken", undefined);
+        await db.saveAccessTokenToUser(email, token);
+
+        let updatedUser = await db.getUserByAccessToken(token);
+
+        expect(updatedUser.email).equal(email);
+    });
 });

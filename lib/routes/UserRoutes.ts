@@ -18,5 +18,9 @@ export class UserRoutes {
         app.post("/users/authenticate", asyncHandler((req: Request, res: Response, next: NextFunction) => {
             userController.authenticateUser(req, res, next, db);
         }));
+
+        app.post("/users/activate", asyncHandler((req: Request, res: Response, next: NextFunction) => {
+            userController.activateUser(req, res, next, db);
+        }));
     }
 }

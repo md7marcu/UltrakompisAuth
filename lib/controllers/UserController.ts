@@ -20,7 +20,6 @@ export class UserController {
         res.status(200).send(user);
     }
 
-    // TODO: Missing Test
     public async activateUser(req: Request, res: Response, next: NextFunction, database: Db) {
         debug(`Activating User: ${JSON.stringify(req.body)}`);
         try {
