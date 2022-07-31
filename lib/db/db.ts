@@ -227,11 +227,33 @@ export default class Db {
                 password: hashedPassword,
                 claims: claims,
                 enabled: true,
+                activationCode: Guid.create().toString(),
             };
             this.users.push(user);
         }
 
         return user;
+    }
+
+    // TODO: Missing test
+    public async activateUser(email: string, activationCode: string): Promise<boolean> {
+        if (this.useMongo) {
+            let mongo = new MongoDb();
+            let user = await mongo.getUserByEmail(email);
+
+            if (user.activationCode === activationCode) {
+                await mongo.activateUser(email);
+
+                return true;
+            }
+            return false;
+        } else {
+            let user = find(this.users, (u) => u.email === email && u.activationCode === activationCode);
+            user.activated = true;
+            user.activationCode = undefined;
+
+            return user !== undefined;
+        }
     }
 
     public async getUser(userId: string): Promise<IUser> {

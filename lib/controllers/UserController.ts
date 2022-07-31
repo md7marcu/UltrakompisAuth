@@ -12,11 +12,24 @@ export class UserController {
         let user;
         try {
             user = await database.addUser(req?.body?.name, req?.body?.email, req?.body?.password, req?.body?.claims);
+            // send email - to req?.body?.email with activation link
         } catch (err) {
             next(err);
         }
         debug(`Sending user: ${JSON.stringify(user)}`);
         res.status(200).send(user);
+    }
+
+    // TODO: Missing Test
+    public async activateUser(req: Request, res: Response, next: NextFunction, database: Db) {
+        debug(`Activating User: ${JSON.stringify(req.body)}`);
+        try {
+            await database.activateUser(req?.body?.email, req?.body?.activationCode);
+        } catch (err) {
+            next(err);
+        }
+        debug("User activated.");
+        res.status(200).send();
     }
 
     public async authenticateUser(req: Request, res: Response, next: NextFunction, database: Db) {

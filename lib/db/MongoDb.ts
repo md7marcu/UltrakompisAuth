@@ -50,6 +50,14 @@ export default class MongoDb {
     }
 
     // TODO: Missing test
+    public async activateUser(email: string): Promise<IUser> {
+        return await userModel.findOneAndUpdate({email: email}, {enabled: true, activationCode: ""})
+            .catch((error) => {
+                throw error;
+            });
+    }
+
+    // TODO: Missing test
     public async getUserByAccessToken(token: string): Promise<IUser> {
         let user = await userModel.findOne({ accessTokens: {$elemMatch: {token: token}}}).lean();
 

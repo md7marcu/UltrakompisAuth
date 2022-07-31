@@ -25,6 +25,16 @@ describe("User routes", () => {
         enabled: true,
     };
 
+    let inactivatedUser = {
+        userId: "123",
+        password: "vidkun",
+        email: "inactivatedUser@email.com",
+        name: "Vidqkun Q.",
+        claims: ["test"],
+        enabled: false,
+        activationCode: "45",
+    };
+
     const authenticateUser = async (email, password): Promise<any> => {
         return await Supertest(app)
             .post("/users/authenticate")
@@ -37,13 +47,17 @@ describe("User routes", () => {
 
         if (process.env.NODE_ENV === "test") {
             await userModel.collection.deleteMany({email: user.email.toLowerCase()});
+            await userModel.collection.deleteMany({email: inactivatedUser.email.toLowerCase()});
         }
         await new userModel(user).save();
+        await new userModel(inactivatedUser).save();
     });
 
     afterEach(async () => {
         if (process.env.NODE_ENV === "test") {
             await userModel.collection.deleteMany({email: testEmail.toLowerCase()});
+            await userModel.collection.deleteMany({email: user.email.toLowerCase()});
+            await userModel.collection.deleteMany({email: inactivatedUser.email.toLowerCase()});
         }
     });
 
@@ -70,6 +84,19 @@ describe("User routes", () => {
         let response: Response = await authenticateUser(user.email, "WrongPassword");
 
         expect(response.status).to.be.equal(401);
+    });
+
+    it("Should return 200 when activating a user", async () => {
+        const response = await Supertest(app)
+            .post("/users/activate")
+            .send({
+                email: inactivatedUser.email,
+                activationCode: inactivatedUser.activationCode,
+            });
+        expect(response.status).to.be.equal(200);
+        let result = await app.db.getUserByEmail(inactivatedUser.email);
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions, no-unused-expressions
+        expect(result.enabled).to.be.true;
     });
 
 });
