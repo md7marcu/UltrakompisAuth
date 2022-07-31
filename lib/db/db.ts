@@ -109,7 +109,6 @@ export default class Db {
         return client;
     }
 
-    // TODO: Save to MongoDB - won't be able to refresh after a restart ..
     public async saveClientRefreshToken(refreshToken: string, clientId: string) {
         if (this.useMongo) {
             await new MongoDb().saveClientRefreshToken(clientId, refreshToken);
@@ -226,12 +225,33 @@ export default class Db {
                 email: email,
                 password: hashedPassword,
                 claims: claims,
-                enabled: true,
+                enabled: false,
+                activationCode: Guid.create().toString(),
             };
             this.users.push(user);
         }
 
         return user;
+    }
+
+    public async activateUser(email: string, activationCode: string): Promise<boolean> {
+        if (this.useMongo) {
+            let mongo = new MongoDb();
+            let user = await mongo.getUserByEmail(email, false);
+
+            if (user?.activationCode === activationCode) {
+                await mongo.activateUser(email);
+
+                return true;
+            }
+            return false;
+        } else {
+            let user = find(this.users, (u) => u.email === email && u.activationCode === activationCode);
+            user.enabled = true;
+            user.activationCode = undefined;
+
+            return user !== undefined;
+        }
     }
 
     public async getUser(userId: string): Promise<IUser> {
@@ -249,12 +269,13 @@ export default class Db {
             return find(this.users, (u) => u.email === email);
         }
     }
-    // TODO: Missing test
+
     public async getUserByAccessToken(token: string): Promise<IUser> {
         if (this.useMongo) {
             return await new MongoDb().getUserByAccessToken(token);
         } else {
-            return find(this.users, (u: IUser) => find(u.accessTokens, (t: string) => t === token));
+            let accessToken = find(this.accessTokens, t => t.accessToken === token);
+            return find(this.users, (u) => u.email === accessToken.email);
         }
     }
     /* --------------------------------------------- SETTINGS --------------------------------------------- */

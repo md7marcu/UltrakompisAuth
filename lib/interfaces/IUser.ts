@@ -8,6 +8,7 @@ export default interface IUser {
     password: string;
     email: string;
     name: string;
+    activationCode?: string;
     idTokens?: IIdToken[];
     accessTokens?: IAccessToken[];
     refreshTokens?: IRefreshToken[];

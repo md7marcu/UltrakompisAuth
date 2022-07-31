@@ -25,6 +25,16 @@ describe("User routes", () => {
         enabled: true,
     };
 
+    let inactivatedUser = {
+        userId: "123",
+        password: "vidkun",
+        email: "inactivatedUser@email.com",
+        name: "Vidqkun Q.",
+        claims: ["test"],
+        enabled: false,
+        activationCode: "45",
+    };
+
     const authenticateUser = async (email, password): Promise<any> => {
         return await Supertest(app)
             .post("/users/authenticate")
@@ -32,18 +42,22 @@ describe("User routes", () => {
             .send({email: email, password: password});
     };
 
-    before( async() => {
+    beforeEach( async() => {
         Debug.disable();
 
         if (process.env.NODE_ENV === "test") {
             await userModel.collection.deleteMany({email: user.email.toLowerCase()});
+            await userModel.collection.deleteMany({email: inactivatedUser.email.toLowerCase()});
         }
         await new userModel(user).save();
+        await new userModel(inactivatedUser).save();
     });
 
     afterEach(async () => {
         if (process.env.NODE_ENV === "test") {
             await userModel.collection.deleteMany({email: testEmail.toLowerCase()});
+            await userModel.collection.deleteMany({email: user.email.toLowerCase()});
+            await userModel.collection.deleteMany({email: inactivatedUser.email.toLowerCase()});
         }
     });
 
@@ -56,6 +70,10 @@ describe("User routes", () => {
                 email: testEmail,
                 password: testPassword,
             });
+
+        let result = await userModel.findOne({email: testEmail}).lean();
+
+        expect(result.email).to.be.equal(testEmail.toLowerCase());
         expect(response.status).to.be.equal(200);
         expect(response.body.name).to.be.equal("TestName");
     });
@@ -70,6 +88,20 @@ describe("User routes", () => {
         let response: Response = await authenticateUser(user.email, "WrongPassword");
 
         expect(response.status).to.be.equal(401);
+    });
+
+    it("Should return 200 when activating a user", async () => {
+        const response = await Supertest(app)
+            .post("/users/activate")
+            .send({
+                email: inactivatedUser.email,
+                activationCode: inactivatedUser.activationCode,
+            });
+        expect(response.status).to.be.equal(200);
+        let result = await userModel.findOne({email: inactivatedUser.email}).lean();
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions, no-unused-expressions
+        expect(result.enabled).to.be.true;
     });
 
 });

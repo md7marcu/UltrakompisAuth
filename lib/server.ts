@@ -15,7 +15,6 @@ const httpsOptions: IHttpsOptions = {
 };
 
 https.createServer(httpsOptions, app).listen(PORT, async () => {
-    await app.initialize();
     app.httpsOptions = httpsOptions;
     console.log("Express server listening on port " + PORT);
     debug("Express server listening on port " + PORT);
