@@ -42,7 +42,7 @@ describe("User routes", () => {
             .send({email: email, password: password});
     };
 
-    before( async() => {
+    beforeEach( async() => {
         Debug.disable();
 
         if (process.env.NODE_ENV === "test") {
@@ -70,6 +70,10 @@ describe("User routes", () => {
                 email: testEmail,
                 password: testPassword,
             });
+
+        let result = await userModel.findOne({email: testEmail}).lean();
+
+        expect(result.email).to.be.equal(testEmail.toLowerCase());
         expect(response.status).to.be.equal(200);
         expect(response.body.name).to.be.equal("TestName");
     });
@@ -94,7 +98,8 @@ describe("User routes", () => {
                 activationCode: inactivatedUser.activationCode,
             });
         expect(response.status).to.be.equal(200);
-        let result = await app.db.getUserByEmail(inactivatedUser.email);
+        let result = await userModel.findOne({email: inactivatedUser.email}).lean();
+
         // eslint-disable-next-line @typescript-eslint/no-unused-expressions, no-unused-expressions
         expect(result.enabled).to.be.true;
     });
